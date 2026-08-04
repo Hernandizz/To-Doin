@@ -102,8 +102,10 @@ defineRoute('/project/:id', async (path) => {
 });
 
 defineRoute('/projects', async () => {
-  // Can be a dedicated projects management view or redirect to inbox
-  navigate('/inbox');
+  if (!getToken()) return navigate('/login');
+  if (!getState().user) await initAppState();
+  
+  renderProjects(appEl, appLayout);
 });
 
 defineRoute('/settings', async () => {
