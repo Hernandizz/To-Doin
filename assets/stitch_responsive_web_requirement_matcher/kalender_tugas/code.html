@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ProModernist - Calendar</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#131b2e",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "outline-variant": "#c6c6cd",
+                      "on-tertiary-container": "#75859d",
+                      "secondary-fixed": "#d8e2ff",
+                      "surface-bright": "#f7f9fb",
+                      "primary": "#000000",
+                      "on-error-container": "#93000a",
+                      "on-primary-fixed": "#131b2e",
+                      "surface-container": "#eceef0",
+                      "on-secondary-fixed": "#001a42",
+                      "primary-fixed": "#dae2fd",
+                      "surface-dim": "#d8dadc",
+                      "surface-variant": "#e0e3e5",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#000000",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-primary-container": "#7c839b",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#bec6e0",
+                      "on-tertiary-fixed-variant": "#38485d",
+                      "on-secondary": "#ffffff",
+                      "tertiary-container": "#0b1c30",
+                      "primary-fixed-dim": "#bec6e0",
+                      "outline": "#76777d",
+                      "surface-container-low": "#f2f4f6",
+                      "on-tertiary": "#ffffff",
+                      "on-surface-variant": "#45464d",
+                      "on-secondary-container": "#fefcff",
+                      "background": "#f7f9fb",
+                      "secondary-container": "#2170e4",
+                      "tertiary-fixed": "#d3e4fe",
+                      "surface": "#f7f9fb",
+                      "surface-tint": "#565e74",
+                      "inverse-surface": "#2d3133",
+                      "error-container": "#ffdad6",
+                      "on-background": "#191c1e",
+                      "error": "#ba1a1a",
+                      "secondary": "#0058be",
+                      "on-secondary-fixed-variant": "#004395",
+                      "surface-container-high": "#e6e8ea",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-tertiary-fixed": "#0b1c30",
+                      "tertiary-fixed-dim": "#b7c8e1",
+                      "on-surface": "#191c1e",
+                      "secondary-fixed-dim": "#adc6ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "stack-lg": "32px",
+                      "container-max-width": "1280px",
+                      "stack-md": "16px",
+                      "unit": "8px",
+                      "margin-desktop": "40px",
+                      "gutter": "24px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "title-md": [
+                              "Manrope"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "title-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Subtle scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e0e3e5;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c6c6cd;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col font-body-md">
+<!-- Top Navigation from JSON -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm full-width top-0 z-50">
+<div class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max-width mx-auto">
+<div class="flex items-center gap-6">
+<span class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-extrabold text-primary dark:text-primary-fixed">ProModernist</span>
+<nav class="hidden md:flex items-center gap-4 ml-8">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 px-3 py-2 rounded" href="#">Layanan</a>
+<a class="font-body-md text-body-md text-secondary dark:text-secondary-fixed border-b-2 border-secondary dark:border-secondary-fixed pb-1 hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 px-3 py-2 rounded" href="#">Fitur</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 px-3 py-2 rounded" href="#">Testimoni</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 px-3 py-2 rounded" href="#">Tentang Kami</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block font-body-md text-body-md font-medium text-primary hover:bg-surface-container-low transition-colors duration-200 px-4 py-2 rounded active:scale-95">Login</button>
+<button class="font-body-md text-body-md font-medium bg-primary text-on-primary hover:bg-primary/90 transition-colors duration-200 px-4 py-2 rounded active:scale-95">Mulai Sekarang</button>
+<button class="md:hidden p-2 text-on-surface hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col md:flex-row max-w-container-max-width mx-auto w-full px-margin-mobile md:px-margin-desktop py-stack-lg gap-gutter">
+<!-- Calendar Grid Area (Left/Main) -->
+<section class="flex-grow flex flex-col bg-surface-container-lowest shadow-[0px_4px_20px_rgba(15,23,42,0.05)] border border-surface-variant rounded-xl overflow-hidden">
+<!-- Calendar Header -->
+<div class="flex items-center justify-between p-stack-md border-b border-surface-container-highest">
+<div class="flex items-center gap-4">
+<h1 class="font-title-md text-title-md text-primary">October 2024</h1>
+<div class="flex items-center bg-surface-container-low rounded-lg p-1">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-md transition-colors font-label-sm text-label-sm px-3">Today</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="hidden sm:flex items-center gap-2">
+<button class="font-label-sm text-label-sm px-3 py-1.5 rounded-md bg-surface-variant text-on-surface font-semibold">Month</button>
+<button class="font-label-sm text-label-sm px-3 py-1.5 rounded-md hover:bg-surface-container text-on-surface-variant transition-colors">Week</button>
+</div>
+</div>
+<!-- Days of Week -->
+<div class="grid grid-cols-7 border-b border-surface-container-highest bg-surface-bright">
+<div class="py-2 text-center font-label-sm text-label-sm text-on-surface-variant">MON</div>
+<div class="py-2 text-center font-label-sm text-label-sm text-on-surface-variant">TUE</div>
+<div class="py-2 text-center font-label-sm text-label-sm text-on-surface-variant">WED</div>
+<div class="py-2 text-center font-label-sm text-label-sm text-on-surface-variant">THU</div>
+<div class="py-2 text-center font-label-sm text-label-sm text-on-surface-variant">FRI</div>
+<div class="py-2 text-center font-label-sm text-label-sm text-on-surface-variant">SAT</div>
+<div class="py-2 text-center font-label-sm text-label-sm text-on-surface-variant">SUN</div>
+</div>
+<!-- Calendar Grid -->
+<div class="grid grid-cols-7 flex-grow min-h-[500px]">
+<!-- Row 1 -->
+<div class="border-r border-b border-surface-container p-2 text-on-surface-variant/40 hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">30</span>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">1</span>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">2</span>
+<div class="mt-1 w-full truncate font-label-sm text-label-sm bg-secondary/10 text-secondary px-1.5 py-0.5 rounded border border-secondary/20">Q4 Planning</div>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">3</span>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">4</span>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface-variant bg-surface-bright min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">5</span>
+</div>
+<div class="border-b border-surface-container p-2 text-on-surface-variant bg-surface-bright min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">6</span>
+</div>
+<!-- Row 2 -->
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">7</span>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">8</span>
+<div class="flex gap-1 mt-auto pb-1">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+</div>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">9</span>
+</div>
+<!-- Selected Date -->
+<div class="border-r border-b border-surface-container p-2 text-on-surface bg-secondary/5 ring-1 ring-inset ring-secondary transition-colors min-h-[100px] flex flex-col relative z-10 shadow-sm">
+<div class="flex justify-between items-center w-full mb-1">
+<span class="material-symbols-outlined text-[16px] text-secondary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">add</span>
+<span class="font-label-sm text-label-sm font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded-full">10</span>
+</div>
+<div class="mt-1 w-full truncate font-label-sm text-label-sm bg-primary text-on-primary px-1.5 py-0.5 rounded">Design Review</div>
+<div class="mt-1 w-full truncate font-label-sm text-label-sm bg-surface-container-high text-on-surface px-1.5 py-0.5 rounded border border-outline-variant">Update Assets</div>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low transition-colors min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">11</span>
+</div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface-variant bg-surface-bright min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">12</span>
+</div>
+<div class="border-b border-surface-container p-2 text-on-surface-variant bg-surface-bright min-h-[100px] flex flex-col group">
+<span class="font-label-sm text-label-sm self-end mb-1">13</span>
+</div>
+<!-- Fill remainder roughly -->
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low min-h-[100px] flex flex-col"><span class="font-label-sm text-label-sm self-end">14</span></div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low min-h-[100px] flex flex-col"><span class="font-label-sm text-label-sm self-end">15</span></div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low min-h-[100px] flex flex-col"><span class="font-label-sm text-label-sm self-end">16</span></div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low min-h-[100px] flex flex-col"><span class="font-label-sm text-label-sm self-end">17</span></div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface hover:bg-surface-container-low min-h-[100px] flex flex-col"><span class="font-label-sm text-label-sm self-end">18</span></div>
+<div class="border-r border-b border-surface-container p-2 text-on-surface-variant bg-surface-bright min-h-[100px] flex flex-col"><span class="font-label-sm text-label-sm self-end">19</span></div>
+<div class="border-b border-surface-container p-2 text-on-surface-variant bg-surface-bright min-h-[100px] flex flex-col"><span class="font-label-sm text-label-sm self-end">20</span></div>
+</div>
+</section>
+<!-- Side Panel (Selected Date Details) -->
+<aside class="w-full md:w-80 lg:w-96 shrink-0 flex flex-col gap-stack-md">
+<div class="bg-surface-container-lowest shadow-[0px_4px_20px_rgba(15,23,42,0.05)] border border-surface-variant rounded-xl p-stack-md flex flex-col h-full">
+<div class="flex items-center justify-between border-b border-surface-container pb-3 mb-4">
+<div>
+<h2 class="font-title-md text-title-md text-primary">Thu, Oct 10</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">2 tasks scheduled</p>
+</div>
+<button class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary/90 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+<!-- Task List -->
+<div class="flex flex-col gap-3 flex-grow overflow-y-auto pr-1">
+<!-- Task Item 1 -->
+<div class="group flex items-start gap-3 p-3 rounded-lg border border-surface-variant hover:border-outline-variant bg-surface-container-lowest hover:shadow-[0px_2px_10px_rgba(15,23,42,0.03)] transition-all">
+<div class="mt-0.5">
+<input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-0 bg-transparent transition-colors cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-grow">
+<h4 class="font-body-md text-body-md text-primary font-medium leading-snug">Design Review Meeting</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 10:00 AM - 11:30 AM
+                            </p>
+</div>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Task Item 2 -->
+<div class="group flex items-start gap-3 p-3 rounded-lg border border-surface-variant hover:border-outline-variant bg-surface-container-lowest hover:shadow-[0px_2px_10px_rgba(15,23,42,0.03)] transition-all">
+<div class="mt-0.5">
+<input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-0 bg-transparent transition-colors cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-grow">
+<h4 class="font-body-md text-body-md text-primary font-medium leading-snug">Update Brand Assets</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">description</span> Shared Drive
+                            </p>
+</div>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick Add Input -->
+<div class="mt-4 pt-4 border-t border-surface-container">
+<div class="relative">
+<input class="w-full bg-surface-bright border border-surface-variant rounded-lg pl-3 pr-10 py-2 font-body-md text-body-md text-primary placeholder:text-on-surface-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none" placeholder="Add a new task..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary p-1">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Footer from JSON -->
+<footer class="bg-surface-container-high dark:bg-surface-container-highest border-t border-outline-variant dark:border-outline full-width bottom-0 mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center py-stack-lg px-margin-mobile md:px-margin-desktop max-w-container-max-width mx-auto gap-4">
+<span class="font-title-md text-title-md font-bold text-primary dark:text-primary-fixed text-center md:text-left">ProModernist</span>
+<nav class="flex flex-wrap justify-center gap-4 md:gap-6">
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100" href="#">Kebijakan Privasi</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100" href="#">Syarat Layanan</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100" href="#">Hubungi Kami</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100" href="#">Karir</a>
+</nav>
+<p class="font-label-sm text-label-sm text-on-surface dark:text-on-surface-variant text-center md:text-right">© 2024 ProModernist Enterprise. Semua hak dilindungi.</p>
+</div>
+</footer>
+</body></html>

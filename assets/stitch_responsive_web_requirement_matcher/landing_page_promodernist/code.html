@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ProModernist - Productivity Ecosystem</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed": "#001a42",
+                      "on-background": "#191c1e",
+                      "surface-bright": "#f7f9fb",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "secondary-container": "#2170e4",
+                      "on-tertiary-fixed-variant": "#38485d",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#b7c8e1",
+                      "tertiary-fixed": "#d3e4fe",
+                      "primary": "#000000",
+                      "secondary": "#0058be",
+                      "on-surface": "#191c1e",
+                      "primary-container": "#131b2e",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-tint": "#565e74",
+                      "surface-container": "#eceef0",
+                      "on-primary-container": "#7c839b",
+                      "tertiary-container": "#0b1c30",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "outline-variant": "#c6c6cd",
+                      "outline": "#76777d",
+                      "inverse-primary": "#bec6e0",
+                      "surface-dim": "#d8dadc",
+                      "tertiary": "#000000",
+                      "on-secondary-container": "#fefcff",
+                      "surface-variant": "#e0e3e5",
+                      "primary-fixed-dim": "#bec6e0",
+                      "on-tertiary-fixed": "#0b1c30",
+                      "inverse-surface": "#2d3133",
+                      "on-secondary": "#ffffff",
+                      "background": "#f7f9fb",
+                      "on-surface-variant": "#45464d",
+                      "surface-container-high": "#e6e8ea",
+                      "surface-container-low": "#f2f4f6",
+                      "on-primary-fixed": "#131b2e",
+                      "secondary-fixed": "#d8e2ff",
+                      "error-container": "#ffdad6",
+                      "error": "#ba1a1a",
+                      "on-tertiary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#75859d",
+                      "primary-fixed": "#dae2fd",
+                      "on-secondary-fixed-variant": "#004395",
+                      "surface": "#f7f9fb",
+                      "on-error": "#ffffff",
+                      "surface-container-lowest": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "unit": "8px",
+                      "margin-desktop": "40px",
+                      "container-max-width": "1280px",
+                      "stack-md": "16px",
+                      "stack-sm": "8px",
+                      "stack-lg": "32px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "label-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "title-md": [
+                              "Manrope"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.0",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "title-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+        .material-symbols-outlined.fill {
+           font-variation-settings: 'FILL' 1;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center h-20 px-margin-desktop md:px-margin-desktop px-margin-mobile max-w-container-max-width mx-auto">
+<div class="flex items-center gap-stack-lg">
+<a class="font-headline-lg text-headline-lg font-extrabold text-primary dark:text-primary-fixed md:font-headline-lg font-headline-lg-mobile md:text-headline-lg text-headline-lg-mobile tracking-tighter" href="#">
+                    ProModernist
+                </a>
+<nav class="hidden md:flex gap-gutter items-center">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#layanan">Layanan</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#fitur">Fitur</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#testimoni">Testimoni</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#tentang-kami">Tentang Kami</a>
+</nav>
+</div>
+<div class="hidden md:flex items-center gap-stack-md">
+<button class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors duration-200 px-4 py-2 uppercase tracking-widest active:scale-95 transition-transform">
+                    Login
+                </button>
+<button class="font-label-sm text-label-sm bg-primary text-on-primary px-6 py-3 rounded-DEFAULT hover:bg-surface-tint transition-colors duration-200 uppercase tracking-widest active:scale-95 transition-transform">
+                    Mulai Sekarang
+                </button>
+</div>
+<!-- Mobile Menu Toggle (Visual Only for Landing Page) -->
+<button class="md:hidden text-on-surface-variant p-2">
+<span class="material-symbols-outlined text-[24px]">menu</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col">
+<!-- Hero Section -->
+<section class="relative pt-24 pb-32 px-margin-desktop md:px-margin-desktop px-margin-mobile overflow-hidden flex flex-col items-center justify-center min-h-[80vh] border-b border-outline-variant">
+<!-- Abstract background shape -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-secondary-fixed/30 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+<div class="max-w-[900px] mx-auto text-center z-10 flex flex-col items-center gap-stack-lg">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-outline-variant bg-surface/50 backdrop-blur-sm mb-4">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Introducing v2.0 Enterprise</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary leading-tight tracking-tighter">
+                    Elevate Professional Output with Precision Ecosystems.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-[600px] mx-auto">
+                    ProModernist unifies fragmented workflows into a singular, highly engineered environment designed for cognitive clarity and peak operational efficiency in enterprise settings.
+                </p>
+<div class="flex flex-col sm:flex-row gap-stack-md mt-stack-md">
+<button class="font-label-sm text-label-sm bg-primary text-on-primary px-8 py-4 rounded-DEFAULT hover:bg-surface-tint transition-all duration-200 uppercase tracking-widest active:scale-95 shadow-[0_10px_30px_rgba(15,23,42,0.1)]">
+                        Mulai Sekarang
+                    </button>
+<button class="font-label-sm text-label-sm bg-surface text-primary border border-outline-variant px-8 py-4 rounded-DEFAULT hover:bg-surface-container-low transition-colors duration-200 uppercase tracking-widest active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+                        Tonton Demo
+                    </button>
+</div>
+</div>
+<!-- Dashboard Mockup Floating -->
+<div class="mt-20 w-full max-w-container-max-width mx-auto relative z-20">
+<div class="aspect-[16/9] w-full rounded-xl overflow-hidden shadow-[0_20px_60px_rgba(15,23,42,0.15)] border border-outline-variant bg-surface relative">
+<img class="w-full h-full object-cover" data-alt="A pristine, highly detailed UI mockup of a modern enterprise software dashboard displayed on a high-resolution screen. The interface features minimalist data visualization charts, clean typography, and a strict grid layout, all rendered in a sophisticated monochrome palette with subtle blue accents. The setting is bright and professional, conveying efficiency and advanced technological capability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDW64uL0wcLDNcnSkv09VLyqHaB8uJFZbBvG-wb159D5Yf9wZF47dxFOZ_wyWiOgUI1_xg4Kd7QswdA6s3pFZvirK62FOuC2EDPOD3BHCNBlixcgHO1u4ziaucPxxp7uD2YrO8xVFT3Y4Bf0DofEqTCrrbZcVpSwgtpZqDJ0Vyo8EdUlMfeUC59Pl-4b2hl35Qd9qQjxbI2-3bladpjf6lJUCDDCS1EgAkMl3vh8oZDJit9ulFhF2Ws"/>
+</div>
+</div>
+</section>
+<!-- Features (Bento Grid) -->
+<section class="py-32 px-margin-desktop md:px-margin-desktop px-margin-mobile bg-surface-container-lowest" id="fitur">
+<div class="max-w-container-max-width mx-auto">
+<div class="mb-16 md:w-1/2">
+<h2 class="font-headline-lg text-headline-lg md:font-headline-lg md:text-headline-lg font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold mb-stack-sm tracking-tight">Architected for Focus</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Minimize friction. Maximize output. Our core modules are engineered to reduce cognitive load.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter auto-rows-[minmax(300px,auto)]">
+<!-- Feature 1 (Large) -->
+<div class="md:col-span-8 bg-surface border border-outline-variant rounded-lg p-stack-lg flex flex-col justify-between group hover:shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition-shadow duration-300 relative overflow-hidden">
+<div class="z-10 relative">
+<span class="material-symbols-outlined text-[32px] text-secondary mb-stack-md">hub</span>
+<h3 class="font-title-md text-title-md text-primary font-semibold mb-stack-sm">Centralized Operations Hub</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">Consolidate disparate data streams into a single, highly readable surface. Make strategic decisions based on real-time, untangled metrics.</p>
+</div>
+<div class="absolute bottom-0 right-0 w-2/3 h-2/3 translate-x-1/4 translate-y-1/4 opacity-40 group-hover:opacity-60 transition-opacity duration-500">
+<img class="w-full h-full object-cover mix-blend-multiply" data-alt="Abstract 3D rendering of interconnected data nodes forming a complex but orderly network structure. The nodes are crisp white spheres connected by precise, thin silver lines against a very light grey background. The lighting is soft and diffuse, creating subtle shadows that give depth to the geometric arrangement, evoking a sense of systematic clarity and modern technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnxbjqjUQ_jDNe_9HfW71kNPatDnI_VRCZ_OUqVIbBPX4f0fBtXAHRhpM-dW8I8j-UaZA6d6XvC3yEgHTbUgWaVKqh0QqFHpmrGNM0_1nr3O57RgSEiEM2F77ki7tkvQ5IOXGm4_qBYzr8JagBvatwoK566s3O1o28PXzng_lqTV3VJB8W3lQBX_O7MOZ6V_osYZGvsfdkpS5JbvMq04_y6Pd2KkRNbMG62hIFN5CUHOerqJFGkZkK"/>
+</div>
+</div>
+<!-- Feature 2 (Small) -->
+<div class="md:col-span-4 bg-surface border border-outline-variant rounded-lg p-stack-lg flex flex-col hover:shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition-shadow duration-300">
+<span class="material-symbols-outlined text-[32px] text-secondary mb-stack-md">security</span>
+<h3 class="font-title-md text-title-md text-primary font-semibold mb-stack-sm">Enterprise Grade Security</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-auto">Bank-level encryption protocols and stringent access controls ensure your intellectual property remains compromised.</p>
+</div>
+<!-- Feature 3 (Small) -->
+<div class="md:col-span-4 bg-surface border border-outline-variant rounded-lg p-stack-lg flex flex-col hover:shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition-shadow duration-300">
+<span class="material-symbols-outlined text-[32px] text-secondary mb-stack-md">bolt</span>
+<h3 class="font-title-md text-title-md text-primary font-semibold mb-stack-sm">Zero-Latency Sync</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-auto">Global edge networking guarantees that state changes are reflected instantaneously across all distributed teams.</p>
+</div>
+<!-- Feature 4 (Large Horizontal) -->
+<div class="md:col-span-8 bg-surface border border-outline-variant rounded-lg p-stack-lg flex flex-col md:flex-row items-center gap-stack-lg hover:shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition-shadow duration-300">
+<div class="md:w-1/2 flex flex-col h-full justify-center">
+<span class="material-symbols-outlined text-[32px] text-secondary mb-stack-md">auto_awesome</span>
+<h3 class="font-title-md text-title-md text-primary font-semibold mb-stack-sm">Algorithmic Triage</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Our proprietary AI engines silently categorize and prioritize incoming tasks, ensuring high-value work surfaces immediately while background noise is suppressed.</p>
+</div>
+<div class="md:w-1/2 w-full h-48 md:h-full bg-surface-container-low rounded border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Minimalist abstract representation of sorting algorithms. Clean, precise vertical bars of varying heights in shades of grey and cool blue, neatly organizing themselves from chaos into perfect order on a stark white background. The image is brightly lit, evoking precision, efficiency, and automated intelligence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaW6I_LKuPUQcrceR0kGm1GQqvfMq-i8E4bLtws-uqgZRyDK9R4EFPfxW-fuCrx9h1qYfMMnwwFEmJDh590bgKiAWimjWPCwFKfDn0mL--_P-4y3bDtnaQPtpZvZMis4ymJ8-hvU9oCY2dFDcNBGffJC4mG0F4Cm3lox6j8Q1osxlW4pqYfjj6TGCh_9YNNLqFX28yZG7sd9oqHh8Hb8OCXPAgDPeQcwapH4nVSBp-al027m4_ZUQ3"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-high dark:bg-surface-container-highest border-t border-outline-variant dark:border-outline mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center py-stack-lg px-margin-desktop md:px-margin-desktop px-margin-mobile max-w-container-max-width mx-auto gap-stack-lg">
+<div class="flex flex-col items-center md:items-start gap-stack-sm">
+<span class="font-title-md text-title-md font-bold text-primary dark:text-primary-fixed tracking-tight">ProModernist</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant uppercase tracking-wider">
+                    © 2024 ProModernist Enterprise. Semua hak dilindungi.
+                </span>
+</div>
+<nav class="flex flex-wrap justify-center gap-gutter">
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100 uppercase tracking-widest" href="#">Kebijakan Privasi</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100 uppercase tracking-widest" href="#">Syarat Layanan</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100 uppercase tracking-widest" href="#">Hubungi Kami</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed hover:underline transition-all opacity-80 hover:opacity-100 uppercase tracking-widest" href="#">Karir</a>
+</nav>
+</div>
+</footer>
+</body></html>

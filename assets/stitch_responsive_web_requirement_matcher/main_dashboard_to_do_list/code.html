@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard Tugas - ProModernist</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#001a42",
+                        "on-background": "#191c1e",
+                        "surface-bright": "#f7f9fb",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "secondary-container": "#2170e4",
+                        "on-tertiary-fixed-variant": "#38485d",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#b7c8e1",
+                        "tertiary-fixed": "#d3e4fe",
+                        "primary": "#000000",
+                        "secondary": "#0058be",
+                        "on-surface": "#191c1e",
+                        "primary-container": "#131b2e",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-tint": "#565e74",
+                        "surface-container": "#eceef0",
+                        "on-primary-container": "#7c839b",
+                        "tertiary-container": "#0b1c30",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "outline-variant": "#c6c6cd",
+                        "outline": "#76777d",
+                        "inverse-primary": "#bec6e0",
+                        "surface-dim": "#d8dadc",
+                        "tertiary": "#000000",
+                        "on-secondary-container": "#fefcff",
+                        "surface-variant": "#e0e3e5",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary-fixed": "#0b1c30",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary": "#ffffff",
+                        "background": "#f7f9fb",
+                        "on-surface-variant": "#45464d",
+                        "surface-container-high": "#e6e8ea",
+                        "surface-container-low": "#f2f4f6",
+                        "on-primary-fixed": "#131b2e",
+                        "secondary-fixed": "#d8e2ff",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#75859d",
+                        "primary-fixed": "#dae2fd",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface": "#f7f9fb",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "unit": "8px",
+                        "margin-desktop": "40px",
+                        "container-max-width": "1280px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "label-sm": ["JetBrains Mono"],
+                        "title-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "title-md": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #f7f9fb; }
+        .task-row:hover .task-actions { opacity: 1; }
+        .task-actions { opacity: 0; transition: opacity 0.2s ease-in-out; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md h-screen overflow-hidden flex flex-col">
+<!-- Top Navigation (Shared Component) -->
+<nav class="bg-surface-container-lowest dark:bg-inverse-surface font-body-md text-body-md shadow-sm border-b border-outline-variant dark:border-outline docked full-width top-0 z-50">
+<div class="flex justify-between items-center h-20 px-margin-desktop max-w-container-max-width mx-auto">
+<div class="flex items-center gap-gutter">
+<a class="font-headline-lg text-headline-lg font-extrabold text-primary dark:text-primary-fixed" href="#">ProModernist</a>
+<div class="hidden md:flex gap-gutter items-center">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 active:scale-95 transition-transform px-3 py-2 rounded" href="#">Layanan</a>
+<a class="text-secondary dark:text-secondary-fixed border-b-2 border-secondary dark:border-secondary-fixed pb-1 hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 active:scale-95 transition-transform px-3 py-2 rounded" href="#">Fitur</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 active:scale-95 transition-transform px-3 py-2 rounded" href="#">Testimoni</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 active:scale-95 transition-transform px-3 py-2 rounded" href="#">Tentang Kami</a>
+</div>
+</div>
+<div class="flex items-center gap-unit">
+<button class="font-label-sm text-label-sm px-4 py-2 border border-outline-variant rounded hover:bg-surface-container-low transition-colors">Login</button>
+<button class="font-label-sm text-label-sm px-4 py-2 bg-primary text-on-primary rounded hover:bg-surface-tint transition-colors">Mulai Sekarang</button>
+<img alt="User Profile" class="w-10 h-10 rounded-full border border-outline-variant ml-4 object-cover" data-alt="A small, circular, minimalist user profile portrait of a professional looking individual against a clean white background. High resolution, modern corporate aesthetic. 50 words description." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbwClg0kalb3jLyqv4QZs8GlPxOQhlOQWBxPnVZVhKe1TrofSmKWr1kHBev3DFeK_ztJJ0f-3k55-AgQZ3Ns6H_Lsdg-VRgt_TNgZ17u1uKpVhmKgJb66q8K0oH9h8WyEbNcFD58wTgRyPWrpthf3V6HN3xiuum0sQn_ImSIpHApinlh9X28OnFYPXK-ehtN38QIY_8UzKZFEfrMYjnU9pt2dOYz71_BPLFNkOCjrhZ4OMQbGoRdD6"/>
+</div>
+</div>
+</nav>
+<!-- Main Dashboard Layout -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-surface-container-lowest border-r border-outline-variant flex flex-col h-full overflow-y-auto shrink-0 hidden md:flex">
+<div class="p-gutter flex flex-col gap-stack-md">
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-2 px-4 rounded hover:bg-surface-tint transition-colors shadow-sm font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Tambah Tugas
+                </button>
+<div class="flex flex-col gap-unit mt-stack-sm">
+<div class="font-label-sm text-label-sm text-outline px-3 mb-2">NAVIGASI UTAMA</div>
+<a class="flex items-center justify-between px-3 py-2 rounded bg-surface-container text-primary font-medium" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">inbox</span>
+<span>Inbox</span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-variant px-2 py-0.5 rounded text-on-surface-variant">12</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 rounded hover:bg-surface-container-low text-on-surface-variant transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">calendar_today</span>
+<span>Hari Ini</span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded text-on-surface-variant">5</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 rounded hover:bg-surface-container-low text-on-surface-variant transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">date_range</span>
+<span>Mendatang</span>
+</div>
+</a>
+</div>
+<div class="flex flex-col gap-unit mt-stack-lg">
+<div class="flex items-center justify-between px-3 mb-2">
+<span class="font-label-sm text-label-sm text-outline">PROYEK</span>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 rounded hover:bg-surface-container-low text-on-surface-variant transition-colors" href="#">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="truncate">Desain Ulang Website</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded hover:bg-surface-container-low text-on-surface-variant transition-colors" href="#">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="truncate">Laporan Q3</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded hover:bg-surface-container-low text-on-surface-variant transition-colors" href="#">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></div>
+<span class="truncate">Rapat Klien</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 bg-background overflow-y-auto p-margin-mobile md:p-margin-desktop">
+<div class="max-w-4xl mx-auto">
+<header class="mb-stack-lg flex justify-between items-end border-b border-outline-variant pb-stack-sm">
+<div>
+<h1 class="font-display-lg text-display-lg text-primary">Inbox</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Selasa, 24 Oktober 2024</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 border border-outline-variant rounded hover:bg-surface-container-low transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">sort</span>
+</button>
+<button class="p-2 border border-outline-variant rounded hover:bg-surface-container-low transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- Task List -->
+<div class="flex flex-col gap-2">
+<!-- Task Item 1: High Priority, Overdue -->
+<div class="task-row group bg-surface-container-lowest p-4 rounded border border-outline-variant shadow-[0_4px_20px_rgba(15,23,42,0.02)] hover:border-outline transition-colors flex gap-4 items-start relative">
+<div class="mt-1">
+<button class="w-5 h-5 rounded border-2 border-error flex items-center justify-center hover:bg-error-container transition-colors focus:outline-none">
+<!-- empty checkbox -->
+</button>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4">
+<h3 class="font-body-md text-body-md text-primary font-medium truncate">Menyelesaikan draf proposal investasi Q4</h3>
+<div class="task-actions flex items-center gap-2">
+<button class="text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="text-outline hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</div>
+<p class="font-body-sm text-on-surface-variant text-sm mt-1 mb-2 line-clamp-2">Pastikan semua data finansial telah divalidasi oleh tim akuntansi sebelum dikirim ke dewan direksi.</p>
+<div class="flex items-center gap-3 flex-wrap">
+<span class="font-label-sm text-label-sm text-error flex items-center gap-1 bg-error-container/30 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    Kemarin
+                                </span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+                                    Laporan Q3
+                                </span>
+</div>
+</div>
+</div>
+<!-- Task Item 2: Medium Priority, Today -->
+<div class="task-row group bg-surface-container-lowest p-4 rounded border border-outline-variant shadow-[0_4px_20px_rgba(15,23,42,0.02)] hover:border-outline transition-colors flex gap-4 items-start relative">
+<div class="mt-1">
+<button class="w-5 h-5 rounded border-2 border-outline flex items-center justify-center hover:bg-surface-container-low transition-colors focus:outline-none">
+</button>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4">
+<h3 class="font-body-md text-body-md text-primary font-medium truncate">Tinjauan desain antarmuka klien</h3>
+<div class="task-actions flex items-center gap-2">
+<button class="text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="text-outline hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-2 flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary-fixed-dim flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    Hari Ini
+                                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                                    Desain Ulang Website
+                                </span>
+</div>
+</div>
+</div>
+<!-- Task Item 3: Low Priority, Tomorrow -->
+<div class="task-row group bg-surface-container-lowest p-4 rounded border border-outline-variant shadow-[0_4px_20px_rgba(15,23,42,0.02)] hover:border-outline transition-colors flex gap-4 items-start relative opacity-80">
+<div class="mt-1">
+<button class="w-5 h-5 rounded border-2 border-outline-variant flex items-center justify-center hover:bg-surface-container-low transition-colors focus:outline-none">
+</button>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4">
+<h3 class="font-body-md text-body-md text-on-surface-variant truncate">Memperbarui dokumentasi API internal</h3>
+<div class="task-actions flex items-center gap-2">
+<button class="text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="text-outline hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-2 flex-wrap">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    Besok
+                                </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Add Input -->
+<div class="mt-stack-md border-t border-outline-variant pt-stack-sm">
+<div class="flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity focus-within:opacity-100 p-2">
+<span class="material-symbols-outlined text-outline">add</span>
+<input class="bg-transparent border-none w-full font-body-md text-body-md text-primary placeholder:text-outline focus:ring-0 focus:outline-none" placeholder="Tambahkan tugas baru..." type="text"/>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

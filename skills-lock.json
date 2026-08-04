@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "skills": {
+    "design-an-interface": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "skillPath": "skills/deprecated/design-an-interface/SKILL.md",
+      "computedHash": "7012bc90f6f71495e52632e0454c2f4c63bf0ebe21d5969be40220f06aef4a1a"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "93f53fd1c0352d3d7ec17b8f73d7351bf76f4821e55d123c9d2abc2c53ba48e4"
+    }
+  }
+}
