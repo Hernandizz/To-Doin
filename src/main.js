@@ -48,7 +48,7 @@ function appLayout(contentHtml) {
 // Routes Definition
 defineRoute('/', (path) => {
   if (getToken()) {
-    navigate('/inbox');
+    navigate('/projects');
   } else {
     appEl.innerHTML = renderNavbar({ isLanding: true }) + renderLanding();
     attachNavbarEvents();
@@ -56,12 +56,12 @@ defineRoute('/', (path) => {
 });
 
 defineRoute('/login', () => {
-  if (getToken()) return navigate('/inbox');
+  if (getToken()) return navigate('/projects');
   appEl.innerHTML = renderAuth(false);
 });
 
 defineRoute('/register', () => {
-  if (getToken()) return navigate('/inbox');
+  if (getToken()) return navigate('/projects');
   appEl.innerHTML = renderAuth(true);
 });
 
@@ -69,7 +69,7 @@ defineRoute('/inbox', async () => {
   if (!getToken()) return navigate('/login');
   if (!getState().user) await initAppState();
   
-  renderInbox(appEl, appLayout, { view: 'inbox' });
+  renderProjects(appEl, appLayout);
 });
 
 defineRoute('/today', async () => {

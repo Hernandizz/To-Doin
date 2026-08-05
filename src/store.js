@@ -25,6 +25,16 @@ export function subscribe(fn) {
 }
 
 // --- Derived helpers ---
+export function getTasksByStatus(tasks) {
+  const groups = { backlog: [], on_progress: [], in_review: [], done: [] };
+  tasks.forEach((t) => {
+    let status = t.status || (t.completed ? 'done' : 'backlog');
+    if (!groups[status]) groups[status] = [];
+    groups[status].push(t);
+  });
+  return groups;
+}
+
 export function getTasksByPriority(tasks) {
   const groups = { urgent: [], important: [], normal: [] };
   tasks.forEach((t) => {

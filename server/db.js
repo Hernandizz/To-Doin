@@ -60,7 +60,12 @@ export async function initDB() {
       project_id INTEGER,
       title TEXT NOT NULL,
       notes TEXT DEFAULT '',
-      priority TEXT DEFAULT 'normal' CHECK(priority IN ('urgent', 'important', 'normal')),
+      priority TEXT DEFAULT 'normal',
+      status TEXT DEFAULT 'backlog',
+      client TEXT DEFAULT '',
+      people TEXT DEFAULT '[]',
+      task_code TEXT DEFAULT '',
+      list_category TEXT DEFAULT 'UXR',
       completed INTEGER DEFAULT 0,
       due_date TEXT,
       due_time TEXT,
@@ -76,6 +81,13 @@ export async function initDB() {
     CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id);
     CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
   `);
+
+  // Safe migrations for existing DB
+  try { await db.exec("ALTER TABLE tasks ADD COLUMN status TEXT DEFAULT 'backlog'"); } catch(e) {}
+  try { await db.exec("ALTER TABLE tasks ADD COLUMN client TEXT DEFAULT ''"); } catch(e) {}
+  try { await db.exec("ALTER TABLE tasks ADD COLUMN people TEXT DEFAULT '[]'"); } catch(e) {}
+  try { await db.exec("ALTER TABLE tasks ADD COLUMN task_code TEXT DEFAULT ''"); } catch(e) {}
+  try { await db.exec("ALTER TABLE tasks ADD COLUMN list_category TEXT DEFAULT 'UXR'"); } catch(e) {}
 
   console.log('✓ Database initialized at', DB_PATH);
 }

@@ -6,74 +6,101 @@ export function renderTaskModal(task = null) {
   const isEdit = !!task;
 
   const priorityOptions = [
-    { value: 'normal', label: 'Normal' },
-    { value: 'important', label: 'Penting' },
-    { value: 'urgent', label: 'Mendesak' }
+    { value: 'urgent', label: 'High' },
+    { value: 'important', label: 'Medium' },
+    { value: 'normal', label: 'Low' },
+    { value: 'not_set', label: 'Not set' }
   ].map(opt => `
-    <option value="${opt.value}" ${task?.priority === opt.value ? 'selected' : ''}>
+    <option value="${opt.value}" ${(task?.priority || 'not_set') === opt.value ? 'selected' : ''}>
       ${opt.label}
     </option>
   `).join('');
 
-  const projectOptions = `
-    <option value="">(Tanpa Proyek)</option>
-    ${projects.map(p => `
-      <option value="${p.id}" ${task?.projectId === p.id ? 'selected' : ''}>
-        ${p.name}
-      </option>
-    `).join('')}
-  `;
+  const categoryOptions = [
+    'UXR', 'Research', 'Marketing', 'UI Design', 'Beta Testing', 'Big Picture'
+  ].map(cat => `
+    <option value="${cat}" ${(task?.listCategory || 'UXR') === cat ? 'selected' : ''}>
+      ${cat}
+    </option>
+  `).join('');
+
+  const statusOptions = [
+    { value: 'backlog', label: 'Backlog' },
+    { value: 'on_progress', label: 'In progress' },
+    { value: 'in_review', label: 'In review' },
+    { value: 'done', label: 'Done' }
+  ].map(opt => `
+    <option value="${opt.value}" ${(task?.status || 'backlog') === opt.value ? 'selected' : ''}>
+      ${opt.label}
+    </option>
+  `).join('');
+
+  const peopleStr = Array.isArray(task?.people) ? task.people.join(', ') : (task?.people || '');
 
   return `
     <div class="modal-overlay" id="task-modal-overlay">
       <div class="modal-content" id="task-modal-content">
         <form id="task-form">
           <div class="modal-header">
-            <h2 class="font-title">${isEdit ? 'Edit Tugas' : 'Tugas Baru'}</h2>
-            <button type="button" class="btn-icon" id="btn-close-modal" aria-label="Tutup">
+            <h2 class="font-title">${isEdit ? 'Edit Task' : 'New Task'}</h2>
+            <button type="button" class="btn-icon" id="btn-close-modal" aria-label="Close">
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
           <div class="modal-body flex-col gap-md">
-            <div>
-              <label class="input-label" for="task-title">Judul Tugas *</label>
-              <input type="text" id="task-title" name="title" class="input" value="${task?.title || ''}" required autofocus placeholder="Apa yang ingin dikerjakan?" />
+            <div class="grid grid-cols-12 gap-sm">
+              <div class="col-span-4">
+                <label class="input-label" for="task-code">Task Code</label>
+                <input type="text" id="task-code" name="taskCode" class="input" value="${task?.taskCode || ''}" placeholder="e.g. XY-473" />
+              </div>
+              <div class="col-span-8">
+                <label class="input-label" for="task-title">Task Name *</label>
+                <input type="text" id="task-title" name="title" class="input" value="${task?.title || ''}" required autofocus placeholder="Define User Personas" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-sm">
+              <div class="col-span-6">
+                <label class="input-label" for="task-status">Status</label>
+                <select id="task-status" name="status" class="input">
+                  ${statusOptions}
+                </select>
+              </div>
+              <div class="col-span-6">
+                <label class="input-label" for="task-category">List (Category)</label>
+                <select id="task-category" name="listCategory" class="input">
+                  ${categoryOptions}
+                </select>
+              </div>
             </div>
 
             <div class="grid grid-cols-12 gap-sm">
               <div class="col-span-4">
-                <label class="input-label" for="task-priority">Prioritas</label>
+                <label class="input-label" for="task-priority">Priority</label>
                 <select id="task-priority" name="priority" class="input">
                   ${priorityOptions}
                 </select>
               </div>
               <div class="col-span-4">
-                <label class="input-label" for="task-date">Tanggal</label>
+                <label class="input-label" for="task-date">Due Date</label>
                 <input type="date" id="task-date" name="dueDate" class="input" value="${task?.dueDate || ''}" />
               </div>
               <div class="col-span-4">
-                <label class="input-label" for="task-time">Waktu (opsional)</label>
-                <input type="time" id="task-time" name="dueTime" class="input" value="${task?.dueTime || ''}" />
+                <label class="input-label" for="task-people">Assignees</label>
+                <input type="text" id="task-people" name="people" class="input" value="${peopleStr}" placeholder="Initials: UP, UX, UI" />
               </div>
             </div>
 
             <div>
-              <label class="input-label" for="task-project">Proyek</label>
-              <select id="task-project" name="projectId" class="input">
-                ${projectOptions}
-              </select>
-            </div>
-
-            <div>
-              <label class="input-label" for="task-notes">Catatan Tambahan</label>
-              <textarea id="task-notes" name="notes" class="input" placeholder="Tambahkan deskripsi atau sub-tugas..." maxlength="2000">${task?.notes || ''}</textarea>
+              <label class="input-label" for="task-notes">Description</label>
+              <textarea id="task-notes" name="notes" class="input" placeholder="Task details and scope..." maxlength="2000">${task?.notes || ''}</textarea>
             </div>
             
             ${isEdit ? `<input type="hidden" name="id" value="${task.id}" />` : ''}
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Batal</button>
-            <button type="submit" class="btn btn-primary">Simpan Tugas</button>
+            <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Task</button>
           </div>
         </form>
       </div>
@@ -114,12 +141,17 @@ export function attachTaskModalEvents(callbacks = {}) {
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
     const formData = new FormData(form);
+    const peopleVal = formData.get('people') || '';
+    const peopleArr = peopleVal ? peopleVal.split(',').map(s => s.trim()).filter(Boolean) : [];
+    
     const data = {
       title: formData.get('title'),
-      priority: formData.get('priority'),
+      taskCode: formData.get('taskCode') || '',
+      listCategory: formData.get('listCategory') || 'UXR',
+      status: formData.get('status') || 'backlog',
+      priority: formData.get('priority') || 'not_set',
+      people: peopleArr,
       dueDate: formData.get('dueDate') || null,
-      dueTime: formData.get('dueTime') || null,
-      projectId: formData.get('projectId') ? parseInt(formData.get('projectId')) : null,
       notes: formData.get('notes'),
       id: formData.get('id') ? parseInt(formData.get('id')) : undefined
     };
