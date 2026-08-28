@@ -1,120 +1,115 @@
-import { renderLanding } from './pages/landing.js';
-import { renderAuth } from './pages/auth.js';
-import { renderInbox } from './pages/inbox.js';
-import { renderCalendar } from './pages/calendar.js';
-import { renderProjects } from './pages/projects.js';
-import { renderSettings } from './pages/settings.js';
+// main — bootstrap aplikasi, routing, layout shell
 
-import { startRouter, defineRoute, navigate } from './router.js';
-import { applyTheme, setState, getState } from './store.js';
-import { auth, tasks, projects, getToken, onUnauthorized } from './api.js';
-import { renderNavbar, attachNavbarEvents } from './components/navbar.js';
+import { renderSidebar, refreshSidebar } from './components/sidebar.js';
+import { renderDashboard } from './views/dashboard.js';
+import { renderBoard } from './views/board.js';
+import { renderApplications } from './views/applications.js';
+import { renderSettings } from './views/settings.js';
+import { openAppForm } from './components/appForm.js';
+import { openDrawer } from './components/appDrawer.js';
+import { h, fmtDay } from './lib/util.js';
+import { iconHTML, iconEl } from './components/icons.js';
+import { subscribe, getState, STAGES } from './lib/store.js';
+import { toast } from './components/toast.js';
 
-const appEl = document.getElementById('app');
+let route = 'dashboard';
+let viewEl;
 
-// Redirect to login if unauthorized api call happens
-onUnauthorized(() => {
-  navigate('/login');
-});
+const ROUTES = {
+  dashboard: { title: 'Ringkasan', sub: 'Peta seluruh perjalanan lamaranmu' },
+  board: { title: 'Papan tahap', sub: 'Geser lamaran satu anak tangga demi satu' },
+  applications: { title: 'Semua lamaran', sub: 'Tabel lengkap untuk menyaring dan mencari' },
+  settings: { title: 'Pengaturan', sub: 'Kelola data, cadangan, dan contoh' },
+};
 
-// Helper to initialize app state
-async function initAppState() {
-  try {
-    const [user, userTasks, userProjects] = await Promise.all([
-      auth.me(),
-      tasks.list(),
-      projects.list()
-    ]);
-    setState({ user, tasks: userTasks, projects: userProjects });
-    return true;
-  } catch (err) {
-    console.error('Failed to init state:', err);
-    return false;
+function navigate(to) {
+  route = to;
+  history.replaceState(null, '', '#/' + to);
+  refreshSidebar();
+  render();
+}
+
+function openApp(app) {
+  const id = typeof app === 'string' ? app : app.id;
+  openDrawer(id);
+}
+
+function render() {
+  if (!viewEl) return;
+  const meta = ROUTES[route];
+  const header = h('div', { class: 'topbar' },
+    h('div', {},
+      h('p', { style: 'font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:4px;' },
+        fmtDay(new Date().toISOString().slice(0, 10))),
+      h('h1', {}, meta.title),
+      h('div', { class: 'sub' }, meta.sub)),
+    h('button', { class: 'btn btn--primary', onclick: () => openAppForm(), style: 'flex:none;' },
+      iconEl('plus', 15), 'Lamaran baru'));
+
+  const content = h('main', { class: 'main' }, header);
+  viewEl.replaceChildren(content);
+  content.append(h('div', { class: 'view-body' }));
+  const bodyEl = content.querySelector('.view-body');
+
+  switch (route) {
+    case 'dashboard':
+      bodyEl.append(renderDashboard(openApp));
+      break;
+    case 'board':
+      bodyEl.append(renderBoard(openApp));
+      break;
+    case 'applications':
+      bodyEl.append(renderApplications(openApp));
+      break;
+    case 'settings':
+      bodyEl.append(renderSettings());
+      break;
   }
 }
 
-// Global layout wrapper for app pages
-function appLayout(contentHtml) {
-  return `
-    <div class="flex flex-col min-h-screen">
-      ${renderNavbar()}
-      <div class="app-layout">
-        ${contentHtml}
-      </div>
-    </div>
-  `;
+function initRouter() {
+  const hash = location.hash.replace(/^#\//, '') || 'dashboard';
+  route = ROUTES[hash] ? hash : 'dashboard';
 }
 
-// Routes Definition
-defineRoute('/', (path) => {
-  if (getToken()) {
-    navigate('/projects');
-  } else {
-    appEl.innerHTML = renderNavbar({ isLanding: true }) + renderLanding();
-    attachNavbarEvents();
+function init() {
+  const app = document.getElementById('app');
+  const shell = h('div', { class: 'shell' });
+  app.append(shell);
+
+  shell.append(renderSidebar({ route, onNav: navigate }));
+
+  const mainWrap = h('div', { style: 'flex:1;min-width:0;display:flex;flex-direction:column;' });
+  shell.append(mainWrap);
+
+  viewEl = h('div', { style: 'flex:1;min-width:0;display:flex;flex-direction:column;' });
+  mainWrap.append(viewEl);
+
+  initRouter();
+  render();
+
+  // klik tengah sidebar tidak perlu; router via hash untuk konten saja
+  window.addEventListener('hashchange', () => {
+    const hash = location.hash.replace(/^#\//, '') || 'dashboard';
+    if (ROUTES[hash]) {
+      route = hash;
+      render();
+    }
+  });
+
+  // reaksi terhadap perubahan data
+  subscribe(() => {
+    refreshSidebar();
+    // view yg sedang aktif di-render ulang agar selalu sinkron
+    render();
+  });
+
+  const first = getState();
+  if (first.apps.length === 0) {
+    setTimeout(() => {
+      toast('Mulai dengan menekan "Lamaran baru", atau muat data contoh di Pengaturan.');
+    }, 400);
   }
-});
+}
 
-defineRoute('/login', () => {
-  if (getToken()) return navigate('/projects');
-  appEl.innerHTML = renderAuth(false);
-});
-
-defineRoute('/register', () => {
-  if (getToken()) return navigate('/projects');
-  appEl.innerHTML = renderAuth(true);
-});
-
-defineRoute('/inbox', async () => {
-  if (!getToken()) return navigate('/login');
-  if (!getState().user) await initAppState();
-  
-  renderProjects(appEl, appLayout);
-});
-
-defineRoute('/today', async () => {
-  if (!getToken()) return navigate('/login');
-  if (!getState().user) await initAppState();
-  
-  renderInbox(appEl, appLayout, { view: 'today' });
-});
-
-defineRoute('/upcoming', async () => {
-  if (!getToken()) return navigate('/login');
-  if (!getState().user) await initAppState();
-  
-  renderInbox(appEl, appLayout, { view: 'upcoming' });
-});
-
-defineRoute('/calendar', async () => {
-  if (!getToken()) return navigate('/login');
-  if (!getState().user) await initAppState();
-  
-  renderCalendar(appEl, appLayout);
-});
-
-defineRoute('/project/:id', async (path) => {
-  if (!getToken()) return navigate('/login');
-  if (!getState().user) await initAppState();
-  
-  const projectId = parseInt(path.split('/')[2]);
-  renderInbox(appEl, appLayout, { view: 'project', projectId });
-});
-
-defineRoute('/projects', async () => {
-  if (!getToken()) return navigate('/login');
-  if (!getState().user) await initAppState();
-  
-  renderProjects(appEl, appLayout);
-});
-
-defineRoute('/settings', async () => {
-  if (!getToken()) return navigate('/login');
-  if (!getState().user) await initAppState();
-  
-  renderSettings(appEl, appLayout);
-});
-
-// App Startup
-applyTheme();
-startRouter();
+init();

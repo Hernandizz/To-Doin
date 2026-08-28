@@ -1,0 +1,65 @@
+/* ============================================================
+   TANGGA — design tokens
+   Konsep: "tangga karier". Dark cockpit tenang dengan aksen
+   lampu meja (amber). Setiap tahap lamaran punya warnanya
+   sendiri dan seluruh antarmuka naik seperti anak tangga.
+   ============================================================ */
+
+:root {
+  /* surfaces */
+  --bg-deep: #0d0f13;
+  --bg: #12151b;
+  --surface: #181c23;
+  --surface-2: #1e232c;
+  --surface-3: #242b36;
+  --border: #2a313d;
+  --border-strong: #3a4351;
+
+  /* ink */
+  --text: #e9ecf2;
+  --text-soft: #aab3c0;
+  --text-muted: #707a88;
+  --text-faint: #4b545f;
+
+  /* primary — the desk lamp */
+  --accent: #e2a33c;
+  --accent-hi: #f0b455;
+  --accent-deep: #b87f22;
+  --accent-soft: rgba(226, 163, 60, 0.12);
+  --accent-glow: rgba(226, 163, 60, 0.35);
+
+  /* stage palette */
+  --stage-draft: #7a8492;
+  --stage-applied: #6fa3c9;
+  --stage-screening: #4fb8a7;
+  --stage-interview: #e2a33c;
+  --stage-offer: #a78bfa;
+  --stage-hired: #52b87f;
+  --stage-rejected: #e0635c;
+
+  /* status */
+  --success: #52b87f;
+  --danger: #e0635c;
+  --info: #6fa3c9;
+
+  /* type */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --fs-display: clamp(2rem, 5vw, 2.6rem);
+  --fs-h2: 1.15rem;
+  --fs-h3: 0.98rem;
+  --fs-body: 0.92rem;
+  --fs-sm: 0.82rem;
+  --fs-tiny: 0.73rem;
+
+  /* layout */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.28);
+
+  --nav-w: 232px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

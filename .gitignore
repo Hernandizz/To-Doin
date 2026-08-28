@@ -1,6 +1,4 @@
 node_modules
-data/
-.vite/
-dist/
+dist
+*.local
 .DS_Store
-*.log
