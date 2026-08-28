@@ -142,12 +142,6 @@
   font-weight: 600;
 }
 
-.topbar .sub {
-  color: var(--text-muted);
-  font-size: var(--fs-sm);
-  margin-top: 4px;
-}
-
 /* ---------- dashboard ---------- */
 
 .kpi-grid {
@@ -222,45 +216,57 @@
   margin-bottom: 16px;
 }
 
-/* funnel */
-.stairs {
+/* stage distribution */
+.stage-chart {
   display: flex;
   flex-direction: column-reverse;
   gap: 6px;
 }
 
-.stair {
+.stage-chart__scale {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 48px 2px 110px;
+  color: var(--text-faint);
+  font-size: .68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-row {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.stair__bar {
+.stage-row__track {
   flex: 1;
   height: 22px;
   background: var(--bg-deep);
-  border-radius: 6px;
+  border-left: 1px solid var(--border-strong);
+  border-radius: 3px;
   overflow: hidden;
 }
 
-.stair__fill {
+.stage-row__bar {
   height: 100%;
-  border-radius: 6px;
-  background: var(--stair-color, var(--accent));
-  opacity: 0.85;
-  min-width: 2px;
+  display: block;
+  border-radius: 0 3px 3px 0;
+  background: var(--stage-color, var(--accent));
+  opacity: 0.9;
   transition: width 0.5s var(--ease);
 }
 
-.stair__count {
-  width: 40px;
+.stage-row__value {
+  width: 48px;
   text-align: right;
   font-family: var(--font-display);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  font-size: .75rem;
+  white-space: nowrap;
 }
 
-.stair__name {
+.stage-row__name {
   width: 110px;
   font-size: var(--fs-sm);
   color: var(--text-soft);

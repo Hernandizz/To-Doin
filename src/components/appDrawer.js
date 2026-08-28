@@ -33,6 +33,8 @@ export function openDrawer(id) {
   document.addEventListener('keydown', onKey);
   handlers.push(subscribe(render));
 
+  current = { overlay, onKey, handlers };
+
   function render() {
     const app = getApp(id);
     if (!app) {

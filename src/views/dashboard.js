@@ -81,24 +81,29 @@ export function renderDashboard(onOpen) {
         h('div', { class: 'kpi__value' }, k.value.toString()),
         h('div', { class: 'kpi__note' }, k.note || ''))));
 
-  // ---- Funnel (tangga tahap) ----
+  // ---- Distribusi tahap ----
   const funnel = h('div', { class: 'panel' },
     h('h2', {}, 'Sebaran tahap'),
-    h('div', { class: 'panel__sub' }, 'Siapa berada di anak tangga mana'),
-    h('div', { class: 'stairs' },
+    h('div', { class: 'panel__sub' }, `${apps.length} total lamaran · skala sampai ${max}`),
+    h('div', { class: 'stage-chart', role: 'img', 'aria-label': 'Distribusi lamaran berdasarkan tahap' },
+      h('div', { class: 'stage-chart__scale', 'aria-hidden': 'true' },
+        h('span', {}, '0'),
+        h('span', {}, Math.ceil(max / 2)),
+        h('span', {}, max)),
       STAGES.map((s) => {
-        const idx = STAGES.findIndex((x) => x.key === s.key);
-        return h('div', { class: 'stair', style: 'animation:rise .3s ease both;' },
-          h('span', { class: 'stair__name' },
+        const value = counts[s.key];
+        const percentage = apps.length ? Math.round((value / apps.length) * 100) : 0;
+        return h('div', { class: 'stage-row', style: 'animation:rise .3s ease both;' },
+          h('span', { class: 'stage-row__name' },
             h('span', { class: 'dot', style: `background:${s.color};` }),
             s.label),
-          h('span', { class: 'stair__bar' },
+          h('span', { class: 'stage-row__track' },
             h('span', {
-              class: 'stair__fill',
-              style: `--stair-color:${s.color}; width:${counts[s.key] ? (counts[s.key] / max) * 100 : 2}%;`,
+              class: 'stage-row__bar',
+              style: `--stage-color:${s.color}; width:${value ? (value / max) * 100 : 0}%;`,
             })),
-          h('span', { class: 'stair__count tabular' }, counts[s.key]));
-      })));
+          h('span', { class: 'stage-row__value tabular' }, `${value} · ${percentage}%`));
+      }))); 
 
   // ---- 6 bulan terakhir (bar chart) ----
   const chartTotal = monthBars.reduce((s, m) => s + m.count, 0);
