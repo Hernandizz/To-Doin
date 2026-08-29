@@ -12,71 +12,106 @@ export function renderCard(app, { onOpen, onAdvance, onBack, onDecline }) {
   const lastLog = app.logs?.at(-1);
   const days = daysSince(app.appliedAt);
 
-  // tangga progress: rung terisi = panggung terlewati (interview sebagai puncak, offer/hired/rejected lanjut)
-  const rungs = STAGES.slice(0, 5); // sampai "Tawaran"
-  const reached = Math.min(activeIdx, rungs.length - 1);
+  const mainStages = STAGES.slice(0, 5);
+  const reached = Math.min(activeIdx, mainStages.length - 1);
 
   const card = h(
     'div',
     {
       class: `app-card${isRejected ? ' is-rejected' : ''}${isHired ? ' is-hired' : ''}`,
-      style: `--card-accent:${meta.color}; --card-glow:${meta.color}33;`,
+      style: `--card-border: ${meta.color};`,
       role: 'button',
       tabindex: '0',
       'aria-label': `${app.company} — ${app.role}`,
       onclick: () => onOpen(app),
       onkeydown: (e) => (e.key === 'Enter' || e.key === ' ') && onOpen(app),
     },
+    // Header
     h('div', { class: 'app-card__top' },
-      h('div', {},
-        h('div', { class: 'app-card__company' }, app.company),
-        h('div', { class: 'app-card__role' }, app.role),
+      h('div', { class: 'min-w-0' },
+        h('div', { class: 'app-card__company truncate' }, app.company),
+        h('div', { class: 'app-card__role truncate' }, app.role),
       ),
-      h('span', { class: 'chip app-card__type', style: `border-color:${meta.color}44; color:${meta.color};` },
-        iconEl('target', 11),
-        stageMeta(app.stage).label
-      ),
+      h('span', {
+        class: 'app-card__badge',
+        style: `border-color:${meta.color}44; color:${meta.color};`
+      },
+        meta.label
+      )
     ),
+
+    // Clean Stepper Progress (solid progress lines, no gaudy gradients)
     h('div', { class: 'rungs', 'aria-hidden': 'true' },
-      rungs.map((s, i) => {
-        let cls = 'rung';
-        if (i <= reached - 1) cls += ' is-reached';
-        else if (i === reached && !TERMINAL.includes(app.stage)) cls += ' is-current';
-        else cls += ' is-locked';
-        return h('span', { class: cls });
+      mainStages.map((s, i) => {
+        let isFilled = i <= reached;
+        if (isRejected || isHired) isFilled = true;
+        return h('span', {
+          class: `rung${isFilled ? ' is-reached' : ''}`,
+          style: isFilled ? `background-color: ${meta.color};` : ''
+        });
       })
     ),
+
+    // Meta details (Date, Location, Salary)
     h('div', { class: 'app-card__meta' },
-      h('span', {}, iconEl('calendar', 12), fmtDateShort(app.appliedAt),
-        days === 0 ? ' (hari ini)' : days === 1 ? ' (kemarin)' : ` (${days}h)`),
+      h('div', { class: 'app-card__meta-item' },
+        iconEl('calendar', 12),
+        fmtDateShort(app.appliedAt),
+        h('span', { style: 'color:var(--text-faint);' },
+          days === 0 ? '· Hari ini' : days === 1 ? '· Kemarin' : `· ${days} hari lalu`
+        )
+      ),
       app.location
-        ? h('span', {}, iconEl('mapPin', 12), app.location)
+        ? h('div', { class: 'app-card__meta-item' }, iconEl('mapPin', 12), app.location)
         : null,
       app.salary
-        ? h('span', {}, iconEl('briefcase', 12), app.salary)
-        : null,
+        ? h('div', { class: 'app-card__meta-item' }, iconEl('briefcase', 12), app.salary)
+        : null
     ),
+
+    // Latest activity snippet
     lastLog
-      ? h('div', { class: 'app-card__last', style: 'font-size:.72rem;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' },
-          iconEl('note', 11), lastLog.text)
+      ? h('div', { class: 'app-card__log' },
+          iconEl('note', 11),
+          h('span', { class: 'truncate' }, lastLog.text)
+        )
       : null,
-    h('div', { class: 'app-card__actions', style: 'display:flex;gap:6px;justify-content:flex-end;' },
+
+    // Action buttons (Advance, Back, Decline)
+    h('div', { class: 'app-card__actions' },
       !isRejected && !isHired && activeIdx > 0
-        ? h('button', { class: 'icon-btn', title: 'Mundur satu tahap', 'aria-label': 'Mundur',
-            onclick: (e) => { e.stopPropagation(); onBack?.(app); } },
-            h('span', { html: iconHTML('arrowDown', 14) }))
+        ? h('button', {
+            class: 'action-btn',
+            title: 'Mundur satu tahap',
+            'aria-label': 'Mundur',
+            onclick: (e) => { e.stopPropagation(); onBack?.(app); }
+          },
+            h('span', { html: iconHTML('arrowDown', 13) })
+          )
         : null,
       !isRejected && !isHired && activeIdx < STAGES.length - 1
-        ? h('button', { class: 'icon-btn', title: 'Naik satu tahap', 'aria-label': 'Naik',
-            onclick: (e) => { e.stopPropagation(); onAdvance?.(app); } },
-            h('span', { html: iconHTML('arrowUp', 14) }))
+        ? h('button', {
+            class: 'action-btn',
+            style: 'color:var(--brand); border-color:var(--brand-border);',
+            title: 'Naik satu tahap',
+            'aria-label': 'Naik',
+            onclick: (e) => { e.stopPropagation(); onAdvance?.(app); }
+          },
+            h('span', { html: iconHTML('arrowUp', 13) })
+          )
         : null,
       !isRejected && !isHired
-        ? h('button', { class: 'icon-btn', title: 'Tandai ditolak', 'aria-label': 'Tandai ditolak',
-            onclick: (e) => { e.stopPropagation(); onDecline?.(app); } },
-            h('span', { html: iconHTML('x', 14) }))
-        : null,
+        ? h('button', {
+            class: 'action-btn action-btn--danger',
+            title: 'Tandai ditolak',
+            'aria-label': 'Tandai ditolak',
+            onclick: (e) => { e.stopPropagation(); onDecline?.(app); }
+          },
+            h('span', { html: iconHTML('x', 13) })
+          )
+        : null
     )
   );
+
   return card;
 }

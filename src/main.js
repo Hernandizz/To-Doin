@@ -8,18 +8,20 @@ import { renderSettings } from './views/settings.js';
 import { openAppForm } from './components/appForm.js';
 import { openDrawer } from './components/appDrawer.js';
 import { h, fmtDay } from './lib/util.js';
-import { iconHTML, iconEl } from './components/icons.js';
-import { subscribe, getState, STAGES } from './lib/store.js';
+import { iconEl } from './components/icons.js';
+import { subscribe, getState } from './lib/store.js';
 import { toast } from './components/toast.js';
 
 let route = 'dashboard';
 let viewEl;
 
+const THEME_KEY = 'tangga.theme';
+
 const ROUTES = {
-  dashboard: { title: 'Ringkasan', sub: 'Peta seluruh perjalanan lamaranmu' },
-  board: { title: 'Papan tahap', sub: 'Geser lamaran satu anak tangga demi satu' },
-  applications: { title: 'Semua lamaran', sub: 'Tabel lengkap untuk menyaring dan mencari' },
-  settings: { title: 'Pengaturan', sub: 'Kelola data, cadangan, dan contoh' },
+  dashboard: { title: 'Ringkasan', sub: 'Peta seluruh perjalanan lamaran kerja kamu' },
+  board: { title: 'Papan Tahap', sub: 'Pantau dan kelola tahapan lamaran secara visual' },
+  applications: { title: 'Semua Lamaran', sub: 'Daftar lengkap untuk menyaring, mencari, dan mengelola' },
+  settings: { title: 'Pengaturan', sub: 'Kelola preferensi tema, cadangan data, dan contoh' },
 };
 
 function navigate(to) {
@@ -34,37 +36,76 @@ function openApp(app) {
   openDrawer(id);
 }
 
+function getStoredTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY) || 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
+function applyTheme(theme = getStoredTheme()) {
+  const next = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try {
+    localStorage.setItem(THEME_KEY, next);
+  } catch {}
+  return next;
+}
+
+function toggleTheme() {
+  const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  applyTheme(next);
+  render();
+}
+
 function render() {
   if (!viewEl) return;
-  const meta = ROUTES[route];
-  const header = h('div', { class: 'topbar' },
-    h('div', {},
-      h('p', { style: 'font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:4px;' },
-        fmtDay(new Date().toISOString().slice(0, 10))),
-      h('h1', {}, meta.title),
-      h('div', { class: 'sub' }, meta.sub)),
-    h('button', { class: 'btn btn--primary', onclick: () => openAppForm(), style: 'flex:none;' },
-      iconEl('plus', 15), 'Lamaran baru'));
+  const meta = ROUTES[route] || ROUTES.dashboard;
+  const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 
-  const content = h('main', { class: 'main' }, header);
-  viewEl.replaceChildren(content);
-  content.append(h('div', { class: 'view-body' }));
-  const bodyEl = content.querySelector('.view-body');
+  const header = h('header', { class: 'page-header' },
+    h('div', { class: 'page-header__meta' },
+      h('span', { class: 'page-header__date' }, fmtDay(new Date().toISOString().slice(0, 10))),
+      h('h1', { class: 'page-header__title' }, meta.title),
+      h('p', { class: 'page-header__sub' }, meta.sub)
+    ),
+    h('div', { class: 'page-header__actions' },
+      h('button', {
+        class: 'btn btn--ghost btn--sm',
+        onclick: toggleTheme,
+        'aria-label': 'Ganti tema'
+      },
+        iconEl(theme === 'dark' ? 'sun' : 'moon', 14),
+        theme === 'dark' ? 'Light mode' : 'Dark mode'
+      ),
+      h('button', {
+        class: 'btn btn--primary',
+        onclick: () => openAppForm()
+      },
+        iconEl('plus', 15), 'Lamaran baru'
+      )
+    )
+  );
+
+  const contentContainer = h('div', { class: 'view-body' });
 
   switch (route) {
     case 'dashboard':
-      bodyEl.append(renderDashboard(openApp));
+      contentContainer.append(renderDashboard(openApp));
       break;
     case 'board':
-      bodyEl.append(renderBoard(openApp));
+      contentContainer.append(renderBoard(openApp));
       break;
     case 'applications':
-      bodyEl.append(renderApplications(openApp));
+      contentContainer.append(renderApplications(openApp));
       break;
     case 'settings':
-      bodyEl.append(renderSettings());
+      contentContainer.append(renderSettings());
       break;
   }
+
+  viewEl.replaceChildren(header, contentContainer);
 }
 
 function initRouter() {
@@ -73,22 +114,20 @@ function initRouter() {
 }
 
 function init() {
+  applyTheme(getStoredTheme());
+
   const app = document.getElementById('app');
-  const shell = h('div', { class: 'shell' });
+  const shell = h('div', { class: 'app-shell' });
   app.append(shell);
 
   shell.append(renderSidebar({ route, onNav: navigate }));
 
-  const mainWrap = h('div', { style: 'flex:1;min-width:0;display:flex;flex-direction:column;' });
-  shell.append(mainWrap);
-
-  viewEl = h('div', { style: 'flex:1;min-width:0;display:flex;flex-direction:column;' });
-  mainWrap.append(viewEl);
+  viewEl = h('main', { class: 'main-content' });
+  shell.append(viewEl);
 
   initRouter();
   render();
 
-  // klik tengah sidebar tidak perlu; router via hash untuk konten saja
   window.addEventListener('hashchange', () => {
     const hash = location.hash.replace(/^#\//, '') || 'dashboard';
     if (ROUTES[hash]) {
@@ -97,10 +136,8 @@ function init() {
     }
   });
 
-  // reaksi terhadap perubahan data
   subscribe(() => {
     refreshSidebar();
-    // view yg sedang aktif di-render ulang agar selalu sinkron
     render();
   });
 
