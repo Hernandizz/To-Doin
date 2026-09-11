@@ -1,7 +1,11 @@
 // view: Ringkasan (dashboard)
 
 import { h, daysSince } from '../lib/util.js';
-import { getState, STAGES, stageMeta, TERMINAL } from '../lib/store.js';
+import { getState, STAGES, stageMeta, TERMINAL, resetDemo } from '../lib/store.js';
+import { openAppForm } from '../components/appForm.js';
+import { openUserGuide } from '../components/userGuide.js';
+import { iconEl } from '../components/icons.js';
+import { toast } from '../components/toast.js';
 
 function kpiPerStage(apps) {
   const counts = {};
@@ -201,6 +205,110 @@ function renderStagePieChart(apps, counts) {
   return h('div', { class: 'pie-chart-wrap' }, graphicWrap, legend);
 }
 
+function renderOnboardingHero() {
+  const hero = h('div', { class: 'onboarding-hero' },
+    h('div', { class: 'onboarding-hero__head' },
+      h('div', {},
+        h('span', { class: 'onboarding-hero__tag' },
+          iconEl('sparkles', 12), 'Mulai Cepat — Pengenalan Tangga'
+        ),
+        h('h2', { class: 'onboarding-hero__title' }, 'Selamat Datang! Kelola Lamaran Kerjamu dengan Rapi'),
+        h('p', { class: 'onboarding-hero__sub' },
+          'Tangga menyusun perjalanan kariermu ke dalam 7 tahap terstruktur. Pilih salah satu langkah di bawah untuk mulai menjelajah tanpa rasa bingung.'
+        )
+      ),
+      h('button', {
+        class: 'btn btn--ghost btn--sm',
+        onclick: openUserGuide,
+        title: 'Buka Buku Panduan'
+      },
+        iconEl('bookOpen', 14), 'Buku Panduan'
+      )
+    ),
+
+    // 3 Langkah Cepat
+    h('div', { class: 'onboarding-steps' },
+      // Step 1: Demo
+      h('div', { class: 'onboarding-step' },
+        h('div', { class: 'onboarding-step__top' },
+          h('span', { class: 'onboarding-step__num' }, '1'),
+          h('span', { class: 'onboarding-step__title' }, 'Jelajah Data Contoh')
+        ),
+        h('p', { class: 'onboarding-step__desc' },
+          'Isi aplikasi dengan kumpulan data contoh nyata untuk langsung melihat grafik, papan kanban, dan logbook beraksi.'
+        ),
+        h('div', { class: 'onboarding-step__action' },
+          h('button', {
+            class: 'btn btn--primary btn--sm',
+            style: 'width: 100%;',
+            onclick: () => {
+              resetDemo();
+              toast('Data contoh berhasil dimuat! Jelajahi Ringkasan & Papan Tahap.', 'success');
+            }
+          },
+            iconEl('sparkles', 14), 'Muat Data Contoh'
+          )
+        )
+      ),
+
+      // Step 2: Tambah Lamaran Asli
+      h('div', { class: 'onboarding-step' },
+        h('div', { class: 'onboarding-step__top' },
+          h('span', { class: 'onboarding-step__num' }, '2'),
+          h('span', { class: 'onboarding-step__title' }, 'Catat Lamaran Asli')
+        ),
+        h('p', { class: 'onboarding-step__desc' },
+          'Punya lowongan yang sedang diincar atau baru saja dikirim? Masukkan nama perusahaan dan posisinya sekarang.'
+        ),
+        h('div', { class: 'onboarding-step__action' },
+          h('button', {
+            class: 'btn btn--ghost btn--sm',
+            style: 'width: 100%;',
+            onclick: () => openAppForm()
+          },
+            iconEl('plus', 14), 'Tambah Lamaran'
+          )
+        )
+      ),
+
+      // Step 3: Pahami Alur
+      h('div', { class: 'onboarding-step' },
+        h('div', { class: 'onboarding-step__top' },
+          h('span', { class: 'onboarding-step__num' }, '3'),
+          h('span', { class: 'onboarding-step__title' }, 'Pahami 7 Tahap')
+        ),
+        h('p', { class: 'onboarding-step__desc' },
+          'Pelajari arti setiap tahapan tangga karier, tips follow-up, dan cara mengelola pergerakan status di papan kanban.'
+        ),
+        h('div', { class: 'onboarding-step__action' },
+          h('button', {
+            class: 'btn btn--ghost btn--sm',
+            style: 'width: 100%;',
+            onclick: openUserGuide
+          },
+            iconEl('help', 14), 'Buka Tutorial'
+          )
+        )
+      )
+    ),
+
+    // Pipeline preview bar
+    h('div', { class: 'onboarding-pipeline' },
+      STAGES.map((s, idx) =>
+        h('div', { style: 'display:flex; align-items:center; gap:6px;' },
+          h('div', { class: 'onboarding-pipeline__item' },
+            h('span', { class: 'dot', style: `background-color:${s.color};` }),
+            s.label
+          ),
+          idx < STAGES.length - 1 ? h('span', { class: 'onboarding-pipeline__sep' }, '→') : null
+        )
+      )
+    )
+  );
+
+  return hero;
+}
+
 export function renderDashboard(onOpen) {
   const apps = getState().apps;
   const counts = kpiPerStage(apps);
@@ -221,12 +329,19 @@ export function renderDashboard(onOpen) {
   const totalRecent = monthBars.slice().reduce((s, m) => s + m.count, 0);
 
   // ---- KPI Metric Cards with intentional line accents ----
-  const kpis = [
-    { label: 'Total Lamaran', value: apps.length, accent: 'var(--brand)', note: `${totalRecent} dalam 6 bulan terakhir` },
-    { label: 'Proses Berjalan', value: active, accent: 'var(--stage-screening)', note: `${interviews} di tahap interview` },
-    { label: 'Tawaran / Diterima', value: offers, accent: 'var(--stage-offer)', note: `${counts.hired} tawaran diterima` },
-    { label: 'Ditolak / Selesai', value: counts.rejected, accent: 'var(--stage-rejected)', note: 'Evaluasi & tingkatkan strategi' },
-  ];
+  const kpis = apps.length === 0
+    ? [
+        { label: 'Total Lamaran', value: 0, accent: 'var(--brand)', note: 'Belum ada lamaran terdaftar' },
+        { label: 'Proses Berjalan', value: 0, accent: 'var(--stage-screening)', note: 'Tahap aktif akan muncul di sini' },
+        { label: 'Tawaran / Diterima', value: 0, accent: 'var(--stage-offer)', note: 'Pencapaian akhir kariermu' },
+        { label: 'Ditolak / Selesai', value: 0, accent: 'var(--stage-rejected)', note: 'Tempat evaluasi strategi' },
+      ]
+    : [
+        { label: 'Total Lamaran', value: apps.length, accent: 'var(--brand)', note: `${totalRecent} dalam 6 bulan terakhir` },
+        { label: 'Proses Berjalan', value: active, accent: 'var(--stage-screening)', note: `${interviews} di tahap interview` },
+        { label: 'Tawaran / Diterima', value: offers, accent: 'var(--stage-offer)', note: `${counts.hired} tawaran diterima` },
+        { label: 'Ditolak / Selesai', value: counts.rejected, accent: 'var(--stage-rejected)', note: 'Evaluasi & tingkatkan strategi' },
+      ];
 
   const kpiGrid = h('div', { class: 'kpi-grid' },
     kpis.map((k, i) =>
@@ -237,8 +352,19 @@ export function renderDashboard(onOpen) {
 
   // ---- Sebaran Tahap (Full Solid Pie Chart) ----
   const stagePie = h('div', { class: 'panel', style: 'flex:1;' },
-    h('h2', {}, 'Sebaran Tahap Lamaran'),
-    h('div', { class: 'panel__sub' }, `${apps.length} total lamaran terdaftar`),
+    h('div', { style: 'display:flex; justify-content:space-between; align-items:flex-start;' },
+      h('div', {},
+        h('h2', {}, 'Sebaran Tahap Lamaran'),
+        h('div', { class: 'panel__sub' }, `${apps.length} total lamaran terdaftar`)
+      ),
+      apps.length > 0
+        ? h('button', {
+            class: 'btn btn--quiet btn--sm',
+            onclick: openUserGuide,
+            title: 'Pelajari alur tahap'
+          }, iconEl('help', 14), 'Alur')
+        : null
+    ),
     renderStagePieChart(apps, counts)
   );
 
@@ -267,7 +393,15 @@ export function renderDashboard(onOpen) {
             h('span', { class: 'sw', style: 'background:var(--brand);' }), ' Bulan Ini',
             h('span', { class: 'chart__meta-d' }, `Rata-rata: ${avgPerMonth.toFixed(1)}/bln`))),
     apps.length === 0
-      ? h('p', { class: 'form-note', style: 'padding:32px 0;text-align:center;' }, 'Belum ada data untuk ditampilkan.')
+      ? h('div', { style: 'padding:32px 16px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px;' },
+          h('p', { class: 'form-note' }, 'Grafik akan otomatis terisi saat kamu mencatat lamaran kerja.'),
+          h('button', {
+            class: 'btn btn--ghost btn--sm',
+            onclick: () => {
+              resetDemo();
+              toast('Data contoh berhasil dimuat!', 'success');
+            }
+          }, iconEl('sparkles', 13), 'Muat contoh untuk lihat grafik'))
       : h('div', { class: 'chart' },
           h('div', { class: 'chart__plot' },
             grid,
@@ -295,7 +429,20 @@ export function renderDashboard(onOpen) {
     h('h2', {}, 'Perlu Tindakan & Follow-up'),
     h('div', { class: 'panel__sub' }, 'Lamaran aktif yang sedang menunggu keputusan'),
     pending.length === 0
-      ? h('p', { class: 'form-note', style: 'padding:16px 0;' }, 'Semua lamaran terkini sudah terkelola.')
+      ? h('div', { style: 'padding:16px 0; display:flex; flex-direction:column; gap:8px;' },
+          h('p', { class: 'form-note' },
+            apps.length === 0
+              ? 'Lamaran di tahap Seleksi, Interview, dan Tawaran akan berkumpul di sini agar kamu mudah memantaunya.'
+              : 'Semua lamaran terkini sudah terkelola dengan baik.'
+          ),
+          apps.length === 0
+            ? h('div', {},
+                h('button', {
+                  class: 'btn btn--ghost btn--sm',
+                  onclick: () => openAppForm()
+                }, iconEl('plus', 13), 'Tambah lamaran'))
+            : null
+        )
       : h('div', { class: 'attention-list' },
           pending.map((a) => {
             const meta = stageMeta(a.stage);
@@ -317,7 +464,7 @@ export function renderDashboard(onOpen) {
       h('h2', {}, 'Ritme & Statistik'),
       h('div', { class: 'panel__sub' }, 'Konsistensi pengiriman dan tingkat respons lamaran'),
       apps.length === 0
-        ? h('p', { class: 'form-note', style: 'padding:16px 0;' }, 'Belum ada data. Mulai tambahkan lamaran baru.')
+        ? h('p', { class: 'form-note', style: 'padding:16px 0;' }, 'Setelah kamu mencatat beberapa lamaran, metrik waktu tunggu dan rasio respons akan otomatis dihitung.')
         : h('div', { style: 'display:flex;flex-direction:column;gap:12px;margin-top:4px;' },
             statRow('Rata-rata lamaran per minggu', (apps.length / Math.max(avgWait, 1)).toFixed(1)),
             statRow('Rata-rata waktu tunggu', `${avgWait} hari`),
@@ -327,6 +474,7 @@ export function renderDashboard(onOpen) {
   const chartsRow = h('div', { class: 'grid-2col' }, chart, stagePie);
 
   return h('div', { style: 'display:flex;flex-direction:column;gap:16px;' },
+    apps.length === 0 ? renderOnboardingHero() : null,
     kpiGrid,
     chartsRow,
     bottomRow);

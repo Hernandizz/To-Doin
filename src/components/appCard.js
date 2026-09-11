@@ -77,40 +77,49 @@ export function renderCard(app, { onOpen, onAdvance, onBack, onDecline }) {
         )
       : null,
 
-    // Action buttons (Advance, Back, Decline)
-    h('div', { class: 'app-card__actions' },
-      !isRejected && !isHired && activeIdx > 0
-        ? h('button', {
-            class: 'action-btn',
-            title: 'Mundur satu tahap',
-            'aria-label': 'Mundur',
-            onclick: (e) => { e.stopPropagation(); onBack?.(app); }
-          },
-            h('span', { html: iconHTML('arrowDown', 13) })
-          )
-        : null,
-      !isRejected && !isHired && activeIdx < STAGES.length - 1
-        ? h('button', {
-            class: 'action-btn',
-            style: 'color:var(--brand); border-color:var(--brand-border);',
-            title: 'Naik satu tahap',
-            'aria-label': 'Naik',
-            onclick: (e) => { e.stopPropagation(); onAdvance?.(app); }
-          },
-            h('span', { html: iconHTML('arrowUp', 13) })
-          )
-        : null,
-      !isRejected && !isHired
-        ? h('button', {
-            class: 'action-btn action-btn--danger',
-            title: 'Tandai ditolak',
-            'aria-label': 'Tandai ditolak',
-            onclick: (e) => { e.stopPropagation(); onDecline?.(app); }
-          },
-            h('span', { html: iconHTML('x', 13) })
-          )
-        : null
-    )
+    // Action buttons (Advance, Back, Decline) and click hint
+    (() => {
+      const nextStage = activeIdx < STAGES.length - 1 ? STAGES[activeIdx + 1].label : '';
+      const prevStage = activeIdx > 0 ? STAGES[activeIdx - 1].label : '';
+
+      return h('div', { class: 'app-card__actions' },
+        h('span', { class: 'card-click-hint', style: 'margin-right:auto;' },
+          iconEl('note', 11),
+          'Klik untuk detail'
+        ),
+        !isRejected && !isHired && activeIdx > 0
+          ? h('button', {
+              class: 'action-btn',
+              title: `Mundur ke tahap ${prevStage}`,
+              'aria-label': `Mundur ke tahap ${prevStage}`,
+              onclick: (e) => { e.stopPropagation(); onBack?.(app); }
+            },
+              h('span', { html: iconHTML('arrowDown', 13) })
+            )
+          : null,
+        !isRejected && !isHired && activeIdx < STAGES.length - 1
+          ? h('button', {
+              class: 'action-btn',
+              style: 'color:var(--brand); border-color:var(--brand-border);',
+              title: `Naik ke tahap ${nextStage}`,
+              'aria-label': `Naik ke tahap ${nextStage}`,
+              onclick: (e) => { e.stopPropagation(); onAdvance?.(app); }
+            },
+              h('span', { html: iconHTML('arrowUp', 13) })
+            )
+          : null,
+        !isRejected && !isHired
+          ? h('button', {
+              class: 'action-btn action-btn--danger',
+              title: 'Tandai lamaran ditolak',
+              'aria-label': 'Tandai lamaran ditolak',
+              onclick: (e) => { e.stopPropagation(); onDecline?.(app); }
+            },
+              h('span', { html: iconHTML('x', 13) })
+            )
+          : null
+      );
+    })()
   );
 
   return card;

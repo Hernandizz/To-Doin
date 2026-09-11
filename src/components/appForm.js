@@ -58,8 +58,8 @@ export function openAppForm(app) {
 
   const row1 = document.createElement('div');
   row1.className = 'grid-2';
-  row1.append(field('Perusahaan', input('company', f.company, 'PT Contoh Nusantara')));
-  row1.append(field('Posisi', input('role', f.role, 'Frontend Developer')));
+  row1.append(field('Perusahaan *', input('company', f.company, 'PT Contoh Nusantara')));
+  row1.append(field('Posisi *', input('role', f.role, 'Frontend Developer')));
 
   const row2 = document.createElement('div');
   row2.className = 'grid-2';
@@ -89,9 +89,10 @@ export function openAppForm(app) {
       )
     )
   );
-  row3.append(
-    field('Tanggal submit', input('appliedAt', f.appliedAt, ''))
-  );
+
+  const dateEl = input('appliedAt', f.appliedAt, '');
+  dateEl.type = 'date';
+  row3.append(field('Tanggal submit', dateEl));
 
   const row4 = document.createElement('div');
   row4.className = 'grid-2';
@@ -105,7 +106,7 @@ export function openAppForm(app) {
       el.className = 'input';
       el.name = 'notes';
       el.value = f.notes || '';
-      el.placeholder = 'Persiapan interview, kontak recruiter, dll.';
+      el.placeholder = 'Persiapan interview, nama kontak recruiter, catatan penting…';
       el.addEventListener('input', () => (f.notes = el.value));
       return el;
     })()
@@ -151,6 +152,7 @@ export function openAppForm(app) {
       });
       toast('Perubahan disimpan.');
     } else {
+      const wasEmpty = getState().apps.length === 0;
       addApp({
         company: f.company.trim(),
         role: f.role.trim(),
@@ -162,7 +164,11 @@ export function openAppForm(app) {
         salary: f.salary.trim(),
         notes: f.notes.trim(),
       });
-      toast('Lamaran ditambahkan.');
+      if (wasEmpty) {
+        toast('Hebat! Lamaran pertamamu tersimpan. Cek di Papan Tahap.', 'success');
+      } else {
+        toast('Lamaran baru berhasil ditambahkan.', 'success');
+      }
     }
     api.close();
   });

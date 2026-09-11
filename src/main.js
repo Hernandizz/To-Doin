@@ -7,6 +7,7 @@ import { renderApplications } from './views/applications.js';
 import { renderSettings } from './views/settings.js';
 import { openAppForm } from './components/appForm.js';
 import { openDrawer } from './components/appDrawer.js';
+import { openUserGuide } from './components/userGuide.js';
 import { h, fmtDay } from './lib/util.js';
 import { iconEl } from './components/icons.js';
 import { subscribe, getState } from './lib/store.js';
@@ -73,11 +74,19 @@ function render() {
     h('div', { class: 'page-header__actions' },
       h('button', {
         class: 'btn btn--ghost btn--sm',
+        onclick: openUserGuide,
+        title: 'Buka Buku Panduan Tangga',
+        'aria-label': 'Panduan'
+      },
+        iconEl('bookOpen', 14), 'Panduan'
+      ),
+      h('button', {
+        class: 'btn btn--ghost btn--sm',
         onclick: toggleTheme,
         'aria-label': 'Ganti tema'
       },
         iconEl(theme === 'dark' ? 'sun' : 'moon', 14),
-        theme === 'dark' ? 'Light mode' : 'Dark mode'
+        theme === 'dark' ? 'Light' : 'Dark'
       ),
       h('button', {
         class: 'btn btn--primary',
@@ -144,7 +153,7 @@ function init() {
   const first = getState();
   if (first.apps.length === 0) {
     setTimeout(() => {
-      toast('Mulai dengan menekan "Lamaran baru", atau muat data contoh di Pengaturan.');
+      toast('Selamat datang di Tangga! Ikuti panduan mulai cepat untuk menjelajah.');
     }, 400);
   }
 }

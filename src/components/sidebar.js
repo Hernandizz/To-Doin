@@ -3,6 +3,7 @@
 import { h } from '../lib/util.js';
 import { iconHTML } from './icons.js';
 import { getState } from '../lib/store.js';
+import { openUserGuide } from './userGuide.js';
 
 let updateFn = null;
 
@@ -68,9 +69,17 @@ export function renderSidebar({ onNav }) {
     ),
     h('div', { class: 'px-2 pb-1 pt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]' }, 'Menu'),
     nav,
-    h('div', { class: 'mt-auto rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs leading-relaxed text-[var(--text-muted)]' },
-      h('span', { class: 'block font-semibold text-[var(--text-secondary)] mb-1' }, 'Tangga Karier'),
-      'Kelola setiap lamaran kerja secara bertahap hingga tawaran diterima.'
+    h('div', { class: 'mt-auto rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs leading-relaxed text-[var(--text-muted)] flex flex-col gap-2' },
+      h('div', { class: 'flex items-center justify-between' },
+        h('span', { class: 'font-semibold text-[var(--text-secondary)]' }, 'Panduan Tangga'),
+        h('span', { class: 'text-[var(--brand)]', html: iconHTML('bookOpen', 14) })
+      ),
+      h('span', {}, 'Pelajari alur 7 tahap lamaran dan cara kerja papan kanban.'),
+      h('button', {
+        class: 'btn btn--ghost btn--sm w-full justify-center',
+        style: 'font-size: 11px; padding: 5px 8px; margin-top: 2px;',
+        onclick: openUserGuide
+      }, 'Buka Buku Panduan')
     )
   );
 

@@ -2,12 +2,37 @@
 
 import { h, fmtDate, debounce } from '../lib/util.js';
 import { iconEl } from '../components/icons.js';
-import { getState, STAGES, stageMeta } from '../lib/store.js';
+import { getState, STAGES, stageMeta, resetDemo } from '../lib/store.js';
+import { openAppForm } from '../components/appForm.js';
+import { toast } from '../components/toast.js';
 
 let state = { query: '', stage: '' };
 
 export function renderApplications(onOpen) {
   const apps = getState().apps;
+
+  if (apps.length === 0) {
+    return h('div', { class: 'empty', style: 'padding:56px 24px; max-width:640px; margin:20px auto; background:var(--surface);' },
+      iconEl('list', 36),
+      h('h3', {}, 'Belum Ada Lamaran yang Tersimpan'),
+      h('p', {},
+        'Halaman ini akan memuat seluruh daftar lowongan yang kamu daftarkan secara rapi, lengkap dengan fitur pencarian cepat, penyaringan per tahap, dan ringkasan lokasi.'
+      ),
+      h('div', { style: 'display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; justify-content:center;' },
+        h('button', {
+          class: 'btn btn--primary',
+          onclick: () => openAppForm()
+        }, iconEl('plus', 15), 'Tambah Lamaran Baru'),
+        h('button', {
+          class: 'btn btn--ghost',
+          onclick: () => {
+            resetDemo();
+            toast('Data contoh berhasil dimuat!', 'success');
+          }
+        }, iconEl('sparkles', 15), 'Muat Data Contoh')
+      )
+    );
+  }
 
   const searchBox = h('input', {
     class: 'input',
@@ -19,6 +44,18 @@ export function renderApplications(onOpen) {
     h('option', { value: '' }, 'Semua Tahap'),
     STAGES.map((s) => h('option', { value: s.key, selected: state.stage === s.key }, s.label)),
   );
+
+  const resetFilterBtn = h('button', {
+    class: 'btn btn--ghost btn--sm',
+    style: 'display:none;',
+    onclick: () => {
+      state.query = '';
+      state.stage = '';
+      searchBox.value = '';
+      stageSelect.value = '';
+      applyFilter();
+    }
+  }, 'Reset Filter');
 
   const body = h('tbody');
   const countLabel = h('div', { class: 'form-note', style: 'margin-top:4px; font-weight:500;' });
@@ -32,13 +69,30 @@ export function renderApplications(onOpen) {
       return matchQ && matchStage;
     });
 
-    countLabel.textContent = `Menampilkan ${list.length} dari ${apps.length} lamaran`;
+    const isFiltered = Boolean(state.query.trim() || state.stage);
+    resetFilterBtn.style.display = isFiltered ? 'inline-flex' : 'none';
+
+    countLabel.textContent = isFiltered
+      ? `Menampilkan ${list.length} dari total ${apps.length} lamaran (terfilter)`
+      : `Menampilkan seluruh ${apps.length} lamaran`;
 
     body.replaceChildren(
       ...(list.length === 0
         ? [h('tr', {},
             h('td', { colspan: '7', style: 'text-align:center;color:var(--text-muted);padding:48px 20px;' },
-              'Tidak ada lamaran yang cocok dengan kriteria pencarian.'))]
+              h('div', { style: 'display:flex; flex-direction:column; align-items:center; gap:8px;' },
+                h('span', {}, 'Tidak ada lamaran yang cocok dengan kriteria pencarian.'),
+                h('button', {
+                  class: 'btn btn--ghost btn--sm',
+                  onclick: () => {
+                    state.query = '';
+                    state.stage = '';
+                    searchBox.value = '';
+                    stageSelect.value = '';
+                    applyFilter();
+                  }
+                }, 'Hapus Filter & Tampilkan Semua')
+              )))]
         : list.map((a) => {
             const meta = stageMeta(a.stage);
             return h('tr', { onclick: () => onOpen(a.id) },
@@ -58,7 +112,7 @@ export function renderApplications(onOpen) {
                 h('span', { style: 'display:inline-flex;gap:4px;align-items:center;white-space:nowrap;' },
                   a.stage === 'hired' ? '✓ Diterima' :
                   a.stage === 'rejected' ? '✕ Ditutup' :
-                  'Detail →')));
+                  'Buka Detail →')));
           })));
   }
 
@@ -85,8 +139,14 @@ export function renderApplications(onOpen) {
 
   applyFilter();
 
-  return h('div', { style: 'display:flex;flex-direction:column;gap:16px;' },
-    h('div', { class: 'toolbar' }, searchBox, stageSelect),
+  const tipBar = h('div', { class: 'table-tip' },
+    iconEl('info', 13),
+    'Klik pada baris lamaran mana saja untuk membuka panel riwayat lengkap, jadwal wawancara, dan logbook.'
+  );
+
+  return h('div', { style: 'display:flex;flex-direction:column;gap:14px;' },
+    tipBar,
+    h('div', { class: 'toolbar' }, searchBox, stageSelect, resetFilterBtn),
     h('div', { class: 'table-wrap' }, table),
     countLabel);
 }
