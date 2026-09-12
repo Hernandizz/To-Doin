@@ -7,28 +7,76 @@ import { openUserGuide } from '../components/userGuide.js';
 import { iconEl } from '../components/icons.js';
 import { toast } from '../components/toast.js';
 
-function kpiPerStage(apps) {
-  const counts = {};
-  for (const s of STAGES) counts[s.key] = 0;
-  for (const a of apps) counts[a.stage] = (counts[a.stage] || 0) + 1;
-  return counts;
-}
+// Perhitungan metrik gabungan dalam 1 pass loop (O(N)) yang sangat efisien
+function computeDashboardMetrics(apps) {
+  const counts = {
+    draft: 0,
+    applied: 0,
+    screening: 0,
+    interview: 0,
+    offer: 0,
+    hired: 0,
+    rejected: 0,
+  };
 
-function barsData(apps) {
   const now = new Date();
   const months = [];
+  const monthMap = new Map();
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const label = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][d.getMonth()];
-    months.push({ key, label, count: 0, thisMonth: i === 0 });
+    const entry = { key, label, count: 0, thisMonth: i === 0 };
+    months.push(entry);
+    monthMap.set(key, entry);
   }
-  for (const a of apps) {
-    const key = (a.appliedAt || '').slice(0, 7);
-    const m = months.find((x) => x.key === key);
-    if (m) m.count++;
+
+  let totalWaitDays = 0;
+  let active = 0;
+  const pending = [];
+
+  for (let i = 0; i < apps.length; i++) {
+    const a = apps[i];
+    const stage = a.stage;
+    counts[stage] = (counts[stage] || 0) + 1;
+
+    if (stage !== 'hired' && stage !== 'rejected') {
+      active++;
+    }
+
+    if (stage === 'interview' || stage === 'offer' || stage === 'screening') {
+      if (pending.length < 5) {
+        pending.push(a);
+      }
+    }
+
+    if (a.appliedAt) {
+      totalWaitDays += daysSince(a.appliedAt);
+      const mKey = a.appliedAt.slice(0, 7);
+      const mEntry = monthMap.get(mKey);
+      if (mEntry) mEntry.count++;
+    }
   }
-  return months;
+
+  const avgWait = apps.length ? Math.round(totalWaitDays / apps.length) : 0;
+  const interviews = counts.interview || 0;
+  const offers = (counts.offer || 0) + (counts.hired || 0);
+
+  let chartTotal = 0;
+  for (let i = 0; i < months.length; i++) {
+    chartTotal += months[i].count;
+  }
+
+  return {
+    counts,
+    active,
+    interviews,
+    offers,
+    pending,
+    avgWait,
+    monthBars: months,
+    chartTotal,
+  };
 }
 
 // skala sumbu-Y rapi (kelipatan 1/2/5/10) agar gridline mudah dibaca
@@ -170,8 +218,9 @@ function renderStagePieChart(apps, counts) {
   }
 
   const graphicWrap = h('div', { class: 'pie-chart-graphic' }, svg);
+  const pieWrap = h('div', { class: 'pie-chart-wrap' }, graphicWrap);
 
-  // Legend list di samping grafik
+  // Legend list di samping grafik - menggunakan CSS-driven hover tanpa DOM query overhead
   const legend = h('div', { class: 'pie-legend' },
     STAGES.map((s) => {
       const val = counts[s.key];
@@ -180,16 +229,10 @@ function renderStagePieChart(apps, counts) {
         class: `pie-legend__item${val === 0 ? ' is-empty' : ''}`,
         'data-stage': s.key,
         onmouseenter: () => {
-          svg.querySelectorAll('.pie-wedge').forEach((el) => {
-            if (el.dataset.stage === s.key) el.classList.add('is-active');
-            else el.style.opacity = '0.35';
-          });
+          pieWrap.dataset.hoverStage = s.key;
         },
         onmouseleave: () => {
-          svg.querySelectorAll('.pie-wedge').forEach((el) => {
-            el.classList.remove('is-active');
-            el.style.opacity = '1';
-          });
+          delete pieWrap.dataset.hoverStage;
         }
       },
         h('div', { class: 'pie-legend__left' },
@@ -202,7 +245,8 @@ function renderStagePieChart(apps, counts) {
     })
   );
 
-  return h('div', { class: 'pie-chart-wrap' }, graphicWrap, legend);
+  pieWrap.append(legend);
+  return pieWrap;
 }
 
 function renderOnboardingHero() {
@@ -311,22 +355,17 @@ function renderOnboardingHero() {
 
 export function renderDashboard(onOpen) {
   const apps = getState().apps;
-  const counts = kpiPerStage(apps);
-  const active = apps.filter((a) => !TERMINAL.includes(a.stage)).length;
-  const interviews = apps.filter((a) => a.stage === 'interview').length;
-  const offers = counts.offer + counts.hired;
-
-  // lamaran menunggu keputusan
-  const pending = apps
-    .filter((a) => a.stage === 'interview' || a.stage === 'offer' || a.stage === 'screening')
-    .slice(0, 5);
-
-  const avgWait = apps.length
-    ? Math.round(apps.reduce((sum, a) => sum + daysSince(a.appliedAt), 0) / apps.length)
-    : 0;
-
-  const monthBars = barsData(apps);
-  const totalRecent = monthBars.slice().reduce((s, m) => s + m.count, 0);
+  const {
+    counts,
+    active,
+    interviews,
+    offers,
+    pending,
+    avgWait,
+    monthBars,
+    chartTotal,
+  } = computeDashboardMetrics(apps);
+  const totalRecent = chartTotal;
 
   // ---- KPI Metric Cards with intentional line accents ----
   const kpis = apps.length === 0
@@ -369,7 +408,6 @@ export function renderDashboard(onOpen) {
   );
 
   // ---- 6 Bulan Terakhir (Bar Chart with solid linings) ----
-  const chartTotal = monthBars.reduce((s, m) => s + m.count, 0);
   const avgPerMonth = chartTotal / 6;
   const { ticks, top } = niceTicks(
     Math.max(...monthBars.map((m) => m.count), Math.ceil(avgPerMonth), 1)

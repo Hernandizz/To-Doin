@@ -43,21 +43,88 @@ const defaultApp = () => ({
 
 let state = load();
 
+// Index pencarian cepat O(1) berdasarkan ID
+let appMap = new Map();
+function rebuildAppIndex() {
+  appMap.clear();
+  for (let i = 0; i < state.apps.length; i++) {
+    const a = state.apps[i];
+    appMap.set(a.id, a);
+  }
+}
+rebuildAppIndex();
+
+// Cache daftar lamaran terurut
+let sortedAppsCache = null;
+
 const listeners = new Set();
 export function subscribe(fn) {
   listeners.add(fn);
   return () => listeners.delete(fn);
 }
+
+// Batch notification menggunakan microtask agar tidak terjadi re-render berlebihan
+let notifyScheduled = false;
 function notify() {
-  for (const fn of listeners) fn();
+  if (notifyScheduled) return;
+  notifyScheduled = true;
+  queueMicrotask(() => {
+    notifyScheduled = false;
+    for (const fn of listeners) {
+      try {
+        fn();
+      } catch (e) {
+        console.error('Error in store listener:', e);
+      }
+    }
+  });
+}
+
+// Asynchronous Batched Persistence: cegah blocking main thread oleh disk I/O
+let persistTimer = null;
+let isPendingPersist = false;
+
+export function flushPersist() {
+  if (!isPendingPersist) return;
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
+  } catch (e) {
+    console.error('Gagal menyimpan ke localStorage:', e);
+  }
+  isPendingPersist = false;
+  if (persistTimer) {
+    if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+      cancelIdleCallback(persistTimer);
+    } else {
+      clearTimeout(persistTimer);
+    }
+    persistTimer = null;
+  }
 }
 
 function persist() {
-  localStorage.setItem(KEY, JSON.stringify(state));
+  isPendingPersist = true;
+  sortedAppsCache = null;
+  rebuildAppIndex();
+  if (!persistTimer) {
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      persistTimer = requestIdleCallback(() => flushPersist(), { timeout: 350 });
+    } else {
+      persistTimer = setTimeout(() => flushPersist(), 80);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', flushPersist);
+  window.addEventListener('pagehide', flushPersist);
 }
 
 function load() {
   try {
+    if (typeof localStorage === 'undefined') return { apps: [] };
     const raw = localStorage.getItem(KEY);
     if (!raw) return { apps: [] };
     const parsed = JSON.parse(raw);
@@ -73,14 +140,15 @@ export function getState() {
 }
 
 export function getApps(stage) {
-  const apps = state.apps.slice();
-  apps.sort((a, b) => b.updatedAt - a.updatedAt);
-  if (!stage) return apps;
-  return apps.filter((a) => a.stage === stage);
+  if (!sortedAppsCache) {
+    sortedAppsCache = state.apps.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+  if (!stage) return sortedAppsCache;
+  return sortedAppsCache.filter((a) => a.stage === stage);
 }
 
 export function getApp(id) {
-  return state.apps.find((a) => a.id === id);
+  return appMap.get(id);
 }
 
 export function addApp(data) {
@@ -171,6 +239,7 @@ export function importJSON(text) {
 }
 
 export function exportJSON() {
+  flushPersist();
   return JSON.stringify(state, null, 2);
 }
 
@@ -338,9 +407,4 @@ function demoApps() {
       updatedAt: t(9),
     },
   ];
-}
-
-// aktifkan data contoh saat pertama kali dibuka (untuk demo)
-if (state.apps.length === 0 && !localStorage.getItem(KEY)) {
-  // tidak otomatis; biarkan pengguna memilih "Muat contoh data"
 }

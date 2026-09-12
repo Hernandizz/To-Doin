@@ -252,6 +252,22 @@ body {
   filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.4));
 }
 
+.pie-chart-wrap[data-hover-stage] .pie-wedge {
+  opacity: 0.35;
+}
+
+.pie-chart-wrap[data-hover-stage="draft"] .pie-wedge[data-stage="draft"],
+.pie-chart-wrap[data-hover-stage="applied"] .pie-wedge[data-stage="applied"],
+.pie-chart-wrap[data-hover-stage="screening"] .pie-wedge[data-stage="screening"],
+.pie-chart-wrap[data-hover-stage="interview"] .pie-wedge[data-stage="interview"],
+.pie-chart-wrap[data-hover-stage="offer"] .pie-wedge[data-stage="offer"],
+.pie-chart-wrap[data-hover-stage="hired"] .pie-wedge[data-stage="hired"],
+.pie-chart-wrap[data-hover-stage="rejected"] .pie-wedge[data-stage="rejected"] {
+  transform: scale(1.04);
+  opacity: 1 !important;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.4));
+}
+
 .pie-slice-label {
   pointer-events: none;
   user-select: none;
@@ -615,6 +631,14 @@ body {
   flex-direction: column;
   gap: 10px;
   min-height: 80px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease, outline 0.15s ease;
+}
+
+.column__drop.is-drag-over {
+  background: var(--brand-soft);
+  outline: 2px dashed var(--brand);
+  outline-offset: -2px;
 }
 
 /* ============================================================
@@ -630,8 +654,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease;
+  cursor: grab;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease, opacity 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
 }
@@ -640,6 +664,13 @@ body {
   border-color: var(--border-strong);
   background: var(--surface-2);
   transform: translateY(-1px);
+}
+
+.app-card.is-dragging {
+  opacity: 0.45;
+  transform: scale(0.97);
+  box-shadow: none;
+  cursor: grabbing;
 }
 
 .app-card.is-rejected {

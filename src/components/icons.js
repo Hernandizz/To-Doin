@@ -24,7 +24,7 @@ export const ICONS = {
   arrowUp:
     '<path d="m5 12 7-7 7 7M12 19V5"/>',
   arrowDown:
-    '<path d="m5 12 7 7 7-7M12 19V5"/>',
+    '<path d="m5 12 7 7 7-7M12 5v14"/>',
   download:
     '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
   upload:
@@ -47,25 +47,36 @@ export const ICONS = {
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
 };
 
-export function icon(name, size = 16) {
-  const svg = document.createElement('span');
-  svg.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${
-    ICONS[name] || ''
-  }</svg>`;
-  svg.style.display = 'inline-flex';
-  svg.style.flex = 'none';
-  return svg;
-}
-
 export const iconHTML = (name, size = 16) =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${
     ICONS[name] || ''
   }</svg>`;
 
+// Cache elemen template untuk mengeliminasi overhead innerHTML parser
+const nodeCache = new Map();
+
+export function icon(name, size = 16) {
+  const key = `${name}:${size}:std`;
+  let cached = nodeCache.get(key);
+  if (!cached) {
+    cached = document.createElement('span');
+    cached.style.display = 'inline-flex';
+    cached.style.flex = 'none';
+    cached.innerHTML = iconHTML(name, size);
+    nodeCache.set(key, cached);
+  }
+  return cached.cloneNode(true);
+}
+
 // kembalikan elemen DOM (untuk dipakai sebagai child node, bukan string)
 export function iconEl(name, size = 16) {
-  const span = document.createElement('span');
-  span.style.cssText = 'display:inline-flex;flex:none;vertical-align:-2px;';
-  span.innerHTML = iconHTML(name, size);
-  return span;
+  const key = `${name}:${size}:el`;
+  let cached = nodeCache.get(key);
+  if (!cached) {
+    cached = document.createElement('span');
+    cached.style.cssText = 'display:inline-flex;flex:none;vertical-align:-2px;';
+    cached.innerHTML = iconHTML(name, size);
+    nodeCache.set(key, cached);
+  }
+  return cached.cloneNode(true);
 }

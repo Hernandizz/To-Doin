@@ -60,61 +60,95 @@ function toggleTheme() {
   render();
 }
 
-function render() {
-  if (!viewEl) return;
+let headerEl = null;
+let contentEl = null;
+let lastHeaderRoute = null;
+let lastHeaderTheme = null;
+
+function updateHeader() {
   const meta = ROUTES[route] || ROUTES.dashboard;
   const theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 
-  const header = h('header', { class: 'page-header' },
-    h('div', { class: 'page-header__meta' },
-      h('span', { class: 'page-header__date' }, fmtDay(new Date().toISOString().slice(0, 10))),
-      h('h1', { class: 'page-header__title' }, meta.title),
-      h('p', { class: 'page-header__sub' }, meta.sub)
+  if (!headerEl || !contentEl) {
+    headerEl = h('header', { class: 'page-header' });
+    contentEl = h('div', { class: 'view-body' });
+    viewEl.replaceChildren(headerEl, contentEl);
+  }
+
+  if (lastHeaderRoute === route && lastHeaderTheme === theme) {
+    return;
+  }
+  lastHeaderRoute = route;
+  lastHeaderTheme = theme;
+
+  const dateStr = fmtDay(new Date().toISOString().slice(0, 10));
+
+  const metaBox = h('div', { class: 'page-header__meta' },
+    h('span', { class: 'page-header__date' }, dateStr),
+    h('h1', { class: 'page-header__title' }, meta.title),
+    h('p', { class: 'page-header__sub' }, meta.sub)
+  );
+
+  const actions = h('div', { class: 'page-header__actions' },
+    h('button', {
+      class: 'btn btn--ghost btn--sm',
+      onclick: openUserGuide,
+      title: 'Buka Buku Panduan Tangga',
+      'aria-label': 'Panduan'
+    },
+      iconEl('bookOpen', 14), 'Panduan'
     ),
-    h('div', { class: 'page-header__actions' },
-      h('button', {
-        class: 'btn btn--ghost btn--sm',
-        onclick: openUserGuide,
-        title: 'Buka Buku Panduan Tangga',
-        'aria-label': 'Panduan'
-      },
-        iconEl('bookOpen', 14), 'Panduan'
-      ),
-      h('button', {
-        class: 'btn btn--ghost btn--sm',
-        onclick: toggleTheme,
-        'aria-label': 'Ganti tema'
-      },
-        iconEl(theme === 'dark' ? 'sun' : 'moon', 14),
-        theme === 'dark' ? 'Light' : 'Dark'
-      ),
-      h('button', {
-        class: 'btn btn--primary',
-        onclick: () => openAppForm()
-      },
-        iconEl('plus', 15), 'Lamaran baru'
-      )
+    h('button', {
+      class: 'btn btn--ghost btn--sm',
+      onclick: toggleTheme,
+      'aria-label': 'Ganti tema'
+    },
+      iconEl(theme === 'dark' ? 'sun' : 'moon', 14),
+      theme === 'dark' ? 'Light' : 'Dark'
+    ),
+    h('button', {
+      class: 'btn btn--primary',
+      onclick: () => openAppForm()
+    },
+      iconEl('plus', 15), 'Lamaran baru'
     )
   );
 
-  const contentContainer = h('div', { class: 'view-body' });
+  headerEl.replaceChildren(metaBox, actions);
+}
 
+function render() {
+  if (!viewEl) return;
+  updateHeader();
+
+  let viewNode;
   switch (route) {
     case 'dashboard':
-      contentContainer.append(renderDashboard(openApp));
+      viewNode = renderDashboard(openApp);
       break;
     case 'board':
-      contentContainer.append(renderBoard(openApp));
+      viewNode = renderBoard(openApp);
       break;
     case 'applications':
-      contentContainer.append(renderApplications(openApp));
+      viewNode = renderApplications(openApp);
       break;
     case 'settings':
-      contentContainer.append(renderSettings());
+      viewNode = renderSettings();
       break;
   }
 
-  viewEl.replaceChildren(header, contentContainer);
+  if (viewNode && contentEl) {
+    contentEl.replaceChildren(viewNode);
+  }
+}
+
+let renderRafId = null;
+function scheduleRender() {
+  if (renderRafId) return;
+  renderRafId = requestAnimationFrame(() => {
+    renderRafId = null;
+    render();
+  });
 }
 
 function initRouter() {
@@ -147,7 +181,7 @@ function init() {
 
   subscribe(() => {
     refreshSidebar();
-    render();
+    scheduleRender();
   });
 
   const first = getState();

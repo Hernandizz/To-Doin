@@ -60,13 +60,22 @@ export function renderApplications(onOpen) {
   const body = h('tbody');
   const countLabel = h('div', { class: 'form-note', style: 'margin-top:4px; font-weight:500;' });
 
+const searchIndexCache = new WeakMap();
+function getSearchIndex(app) {
+  let idx = searchIndexCache.get(app);
+  if (!idx) {
+    idx = `${app.company} ${app.role} ${app.location || ''}`.toLowerCase();
+    searchIndexCache.set(app, idx);
+  }
+  return idx;
+}
+
   function applyFilter() {
     const q = state.query.trim().toLowerCase();
     const list = apps.filter((a) => {
-      const matchQ =
-        !q || a.company.toLowerCase().includes(q) || a.role.toLowerCase().includes(q);
-      const matchStage = !state.stage || a.stage === state.stage;
-      return matchQ && matchStage;
+      if (state.stage && a.stage !== state.stage) return false;
+      if (!q) return true;
+      return getSearchIndex(a).includes(q);
     });
 
     const isFiltered = Boolean(state.query.trim() || state.stage);
@@ -76,44 +85,53 @@ export function renderApplications(onOpen) {
       ? `Menampilkan ${list.length} dari total ${apps.length} lamaran (terfilter)`
       : `Menampilkan seluruh ${apps.length} lamaran`;
 
-    body.replaceChildren(
-      ...(list.length === 0
-        ? [h('tr', {},
-            h('td', { colspan: '7', style: 'text-align:center;color:var(--text-muted);padding:48px 20px;' },
-              h('div', { style: 'display:flex; flex-direction:column; align-items:center; gap:8px;' },
-                h('span', {}, 'Tidak ada lamaran yang cocok dengan kriteria pencarian.'),
-                h('button', {
-                  class: 'btn btn--ghost btn--sm',
-                  onclick: () => {
-                    state.query = '';
-                    state.stage = '';
-                    searchBox.value = '';
-                    stageSelect.value = '';
-                    applyFilter();
-                  }
-                }, 'Hapus Filter & Tampilkan Semua')
-              )))]
-        : list.map((a) => {
-            const meta = stageMeta(a.stage);
-            return h('tr', { onclick: () => onOpen(a.id) },
-              h('td', {},
-                h('div', { class: 'row-company' }, a.company),
-                h('div', { class: 'row-role' }, a.role)),
-              h('td', { class: 'table-brain' }, h('span', { style: 'color:var(--text-secondary);font-size:0.8125rem;display:inline-flex;gap:6px;align-items:center;' },
-                iconEl('mapPin', 12), a.location || '—')),
-              h('td', {},
-                h('span', { class: 'chip meta-chip', style: `border-color:${meta.color}44; color:${meta.color};` }, meta.label)),
-              h('td', { class: 'table-brain' },
-                h('span', { style: 'font-size:0.8125rem;color:var(--text-secondary);' },
-                  a.workType === 'remote' ? 'Remote' : a.workType === 'hybrid' ? 'Hybrid' : 'Onsite')),
-              h('td', {}, h('span', { class: 'tabular', style: 'font-size:0.85rem;color:var(--text-soft);' }, fmtDate(a.appliedAt))),
-              h('td', { class: 'table-brain' }, h('span', { style: 'font-size:0.8125rem;color:var(--text-secondary);' }, a.salary || '—')),
-              h('td', { style: 'text-align:right;color:var(--brand);font-size:0.8125rem;font-weight:500;' },
-                h('span', { style: 'display:inline-flex;gap:4px;align-items:center;white-space:nowrap;' },
-                  a.stage === 'hired' ? '✓ Diterima' :
-                  a.stage === 'rejected' ? '✕ Ditutup' :
-                  'Buka Detail →')));
-          })));
+    if (list.length === 0) {
+      body.replaceChildren(
+        h('tr', {},
+          h('td', { colspan: '7', style: 'text-align:center;color:var(--text-muted);padding:48px 20px;' },
+            h('div', { style: 'display:flex; flex-direction:column; align-items:center; gap:8px;' },
+              h('span', {}, 'Tidak ada lamaran yang cocok dengan kriteria pencarian.'),
+              h('button', {
+                class: 'btn btn--ghost btn--sm',
+                onclick: () => {
+                  state.query = '';
+                  state.stage = '';
+                  searchBox.value = '';
+                  stageSelect.value = '';
+                  applyFilter();
+                }
+              }, 'Hapus Filter & Tampilkan Semua')
+            )))
+      );
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < list.length; i++) {
+      const a = list[i];
+      const meta = stageMeta(a.stage);
+      const row = h('tr', { onclick: () => onOpen(a.id) },
+        h('td', {},
+          h('div', { class: 'row-company' }, a.company),
+          h('div', { class: 'row-role' }, a.role)),
+        h('td', { class: 'table-brain' }, h('span', { style: 'color:var(--text-secondary);font-size:0.8125rem;display:inline-flex;gap:6px;align-items:center;' },
+          iconEl('mapPin', 12), a.location || '—')),
+        h('td', {},
+          h('span', { class: 'chip meta-chip', style: `border-color:${meta.color}44; color:${meta.color};` }, meta.label)),
+        h('td', { class: 'table-brain' },
+          h('span', { style: 'font-size:0.8125rem;color:var(--text-secondary);' },
+            a.workType === 'remote' ? 'Remote' : a.workType === 'hybrid' ? 'Hybrid' : 'Onsite')),
+        h('td', {}, h('span', { class: 'tabular', style: 'font-size:0.85rem;color:var(--text-soft);' }, fmtDate(a.appliedAt))),
+        h('td', { class: 'table-brain' }, h('span', { style: 'font-size:0.8125rem;color:var(--text-secondary);' }, a.salary || '—')),
+        h('td', { style: 'text-align:right;color:var(--brand);font-size:0.8125rem;font-weight:500;' },
+          h('span', { style: 'display:inline-flex;gap:4px;align-items:center;white-space:nowrap;' },
+            a.stage === 'hired' ? '✓ Diterima' :
+            a.stage === 'rejected' ? '✕ Ditutup' :
+            'Buka Detail →')));
+      frag.append(row);
+    }
+
+    body.replaceChildren(frag);
   }
 
   searchBox.addEventListener('input', debounce(() => {

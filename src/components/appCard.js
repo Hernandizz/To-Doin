@@ -22,9 +22,18 @@ export function renderCard(app, { onOpen, onAdvance, onBack, onDecline }) {
       style: `--card-border: ${meta.color};`,
       role: 'button',
       tabindex: '0',
+      draggable: 'true',
       'aria-label': `${app.company} — ${app.role}`,
       onclick: () => onOpen(app),
       onkeydown: (e) => (e.key === 'Enter' || e.key === ' ') && onOpen(app),
+      ondragstart: (e) => {
+        e.dataTransfer.setData('text/plain', app.id);
+        e.dataTransfer.effectAllowed = 'move';
+        card.classList.add('is-dragging');
+      },
+      ondragend: () => {
+        card.classList.remove('is-dragging');
+      },
     },
     // Header
     h('div', { class: 'app-card__top' },
