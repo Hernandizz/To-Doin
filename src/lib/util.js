@@ -10,32 +10,46 @@ export const BULAN = [
 
 export const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
+export function toMs(val) {
+  if (!val) return 0;
+  if (typeof val === 'number') return val;
+  const t = Date.parse(val);
+  return isNaN(t) ? 0 : t;
+}
+
 export function fmtDate(iso) {
   if (!iso) return '—';
-  const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
-  if (isNaN(d)) return '—';
+  const d = new Date(iso + (typeof iso === 'string' && iso.length === 10 ? 'T00:00:00' : ''));
+  if (isNaN(d.getTime())) return '—';
   return `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export function fmtDateShort(iso) {
   if (!iso) return '—';
-  const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
-  if (isNaN(d)) return '—';
+  const d = new Date(iso + (typeof iso === 'string' && iso.length === 10 ? 'T00:00:00' : ''));
+  if (isNaN(d.getTime())) return '—';
   return `${d.getDate()} ${BULAN[d.getMonth()]}`;
 }
 
 export function fmtDay(iso) {
-  const d = new Date(iso.length === 10 ? iso + 'T00:00:00' : iso);
+  if (!iso) return '—';
+  const d = new Date(typeof iso === 'string' && iso.length === 10 ? iso + 'T00:00:00' : iso);
+  if (isNaN(d.getTime())) return '—';
   return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]}`;
 }
 
-export function daysSince(iso) {
-  const d = new Date(iso.length === 10 ? iso + 'T00:00:00' : iso);
+export function daysSince(val) {
+  if (!val) return 0;
+  const d = typeof val === 'number'
+    ? new Date(val)
+    : new Date(val.length === 10 ? val + 'T00:00:00' : val);
+  if (isNaN(d.getTime())) return 0;
   const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
-  return diff;
+  return Math.max(0, diff);
 }
 
 export function relTime(iso) {
+  if (!iso) return '—';
   const diff = daysSince(iso);
   if (diff <= 0) return 'hari ini';
   if (diff === 1) return 'kemarin';
@@ -53,10 +67,10 @@ export function todayISO() {
 }
 
 export function monthKey(iso) {
-  return iso.slice(0, 7); // yyyy-mm
+  return iso ? String(iso).slice(0, 7) : ''; // yyyy-mm
 }
 
-// el — tiny hypescript-ish DOM builder
+// el — tiny hypescript-ish DOM builder yang efisien
 export function h(tag, attrs = {}, ...kids) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -69,9 +83,12 @@ export function h(tag, attrs = {}, ...kids) {
     } else if (k === 'value') node.value = v;
     else node.setAttribute(k, v === true ? '' : v);
   }
-  for (const kid of kids.flat(Infinity)) {
-    if (kid == null || kid === false) continue;
-    node.append(kid.nodeType ? kid : document.createTextNode(kid));
+  const flat = kids.flat(Infinity);
+  for (let i = 0; i < flat.length; i++) {
+    const kid = flat[i];
+    if (kid != null && kid !== false) {
+      node.append(kid);
+    }
   }
   return node;
 }

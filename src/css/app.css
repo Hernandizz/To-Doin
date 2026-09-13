@@ -655,6 +655,7 @@ body {
   flex-direction: column;
   gap: 10px;
   cursor: grab;
+  contain: layout style;
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease, opacity 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;

@@ -2,14 +2,24 @@
 
 import { h, fmtDate, debounce } from '../lib/util.js';
 import { iconEl } from '../components/icons.js';
-import { getState, STAGES, stageMeta, resetDemo } from '../lib/store.js';
+import { getApps, STAGES, stageMeta, resetDemo } from '../lib/store.js';
 import { openAppForm } from '../components/appForm.js';
 import { toast } from '../components/toast.js';
 
 let state = { query: '', stage: '' };
 
+const searchIndexCache = new WeakMap();
+function getSearchIndex(app) {
+  let idx = searchIndexCache.get(app);
+  if (!idx) {
+    idx = `${app.company || ''} ${app.role || ''} ${app.location || ''}`.toLowerCase();
+    searchIndexCache.set(app, idx);
+  }
+  return idx;
+}
+
 export function renderApplications(onOpen) {
-  const apps = getState().apps;
+  const apps = getApps();
 
   if (apps.length === 0) {
     return h('div', { class: 'empty', style: 'padding:56px 24px; max-width:640px; margin:20px auto; background:var(--surface);' },
@@ -36,7 +46,7 @@ export function renderApplications(onOpen) {
 
   const searchBox = h('input', {
     class: 'input',
-    placeholder: 'Cari perusahaan atau posisi jabatan…',
+    placeholder: 'Cari perusahaan atau posisi (Tekan "/" untuk fokus)…',
     value: state.query,
   });
 
@@ -59,16 +69,6 @@ export function renderApplications(onOpen) {
 
   const body = h('tbody');
   const countLabel = h('div', { class: 'form-note', style: 'margin-top:4px; font-weight:500;' });
-
-const searchIndexCache = new WeakMap();
-function getSearchIndex(app) {
-  let idx = searchIndexCache.get(app);
-  if (!idx) {
-    idx = `${app.company} ${app.role} ${app.location || ''}`.toLowerCase();
-    searchIndexCache.set(app, idx);
-  }
-  return idx;
-}
 
   function applyFilter() {
     const q = state.query.trim().toLowerCase();

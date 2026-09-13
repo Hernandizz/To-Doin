@@ -1,7 +1,7 @@
 // view: Ringkasan (dashboard)
 
 import { h, daysSince } from '../lib/util.js';
-import { getState, STAGES, stageMeta, TERMINAL, resetDemo } from '../lib/store.js';
+import { getApps, STAGES, stageMeta, TERMINAL, resetDemo } from '../lib/store.js';
 import { openAppForm } from '../components/appForm.js';
 import { openUserGuide } from '../components/userGuide.js';
 import { iconEl } from '../components/icons.js';
@@ -354,7 +354,7 @@ function renderOnboardingHero() {
 }
 
 export function renderDashboard(onOpen) {
-  const apps = getState().apps;
+  const apps = getApps();
   const {
     counts,
     active,
@@ -504,7 +504,7 @@ export function renderDashboard(onOpen) {
       apps.length === 0
         ? h('p', { class: 'form-note', style: 'padding:16px 0;' }, 'Setelah kamu mencatat beberapa lamaran, metrik waktu tunggu dan rasio respons akan otomatis dihitung.')
         : h('div', { style: 'display:flex;flex-direction:column;gap:12px;margin-top:4px;' },
-            statRow('Rata-rata lamaran per minggu', (apps.length / Math.max(avgWait, 1)).toFixed(1)),
+            statRow('Rata-rata lamaran per minggu', (apps.length / Math.max(avgWait / 7, 1)).toFixed(1)),
             statRow('Rata-rata waktu tunggu', `${avgWait} hari`),
             statRow('Tingkat konversi respons', `${Math.round(((apps.length - (counts.draft + counts.applied)) / Math.max(apps.length,1)) * 100)}%`),
           )));

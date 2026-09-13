@@ -35,7 +35,9 @@ export function openAppForm(app) {
     el.name = name;
     el.value = value || '';
     el.placeholder = placeholder;
-    el.addEventListener('input', () => (f[name] = el.value));
+    const update = () => (f[name] = el.value);
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
     return el;
   };
 
@@ -113,6 +115,13 @@ export function openAppForm(app) {
   );
 
   body.append(row1, row2, row3, row4, notesField);
+
+  body.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      saveBtn.click();
+    }
+  });
 
   const cancelBtn = document.createElement('button');
   cancelBtn.className = 'btn btn--ghost';

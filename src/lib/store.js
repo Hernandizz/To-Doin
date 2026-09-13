@@ -1,6 +1,6 @@
 // store — state, persistensi localStorage, dan seluruh operasi CRUD
 
-import { uid, todayISO } from './util.js';
+import { uid, todayISO, toMs } from './util.js';
 
 const KEY = 'tangga.data.v1';
 
@@ -141,7 +141,7 @@ export function getState() {
 
 export function getApps(stage) {
   if (!sortedAppsCache) {
-    sortedAppsCache = state.apps.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+    sortedAppsCache = state.apps.slice().sort((a, b) => toMs(b.updatedAt) - toMs(a.updatedAt));
   }
   if (!stage) return sortedAppsCache;
   return sortedAppsCache.filter((a) => a.stage === stage);
@@ -172,6 +172,7 @@ export function updateApp(id, patch) {
 
 export function deleteApp(id) {
   state.apps = state.apps.filter((a) => a.id !== id);
+  appMap.delete(id);
   persist();
   notify();
 }
@@ -209,9 +210,11 @@ export function setStage(id, stageKey) {
 export function moveStage(id, dir) {
   const app = getApp(id);
   if (!app) return;
+  if (TERMINAL.includes(app.stage)) return;
   const idx = STAGES.findIndex((s) => s.key === app.stage);
   const next = idx + dir;
   if (next < 0 || next >= STAGES.length) return;
+  if (STAGES[next].key === 'rejected') return;
   setStage(id, STAGES[next].key);
 }
 
@@ -230,10 +233,16 @@ export function clearAll() {
 export function importJSON(text) {
   const data = JSON.parse(text);
   if (!Array.isArray(data.apps)) throw new Error('Format salah: butuh { apps: [...] }');
-  const merged = state.apps
-    .concat(data.apps)
-    .filter((a, i, arr) => arr.findIndex((x) => x.id === a.id) === i);
-  state = { apps: merged };
+  const existingIds = new Set(state.apps.map((a) => a.id));
+  const newApps = [];
+  for (let i = 0; i < data.apps.length; i++) {
+    const item = data.apps[i];
+    if (item && item.id && !existingIds.has(item.id)) {
+      existingIds.add(item.id);
+      newApps.push(item);
+    }
+  }
+  state = { apps: state.apps.concat(newApps) };
   persist();
   notify();
 }

@@ -1,7 +1,7 @@
 // view: Papan tahap (kanban)
 
 import { h } from '../lib/util.js';
-import { STAGES, TERMINAL, getState, getApp, setStage, moveStage, resetDemo } from '../lib/store.js';
+import { STAGES, TERMINAL, getApps, getApp, setStage, moveStage, resetDemo } from '../lib/store.js';
 import { renderCard } from '../components/appCard.js';
 import { toast } from '../components/toast.js';
 import { confirmDialog } from '../components/modal.js';
@@ -30,7 +30,7 @@ const STAGE_EMPTY_TIPS = {
 };
 
 export function renderBoard(onOpen) {
-  const apps = getState().apps;
+  const apps = getApps();
 
   // Kelompokkan lamaran per tahap dalam 1 pass (O(N))
   const stageLists = {};

@@ -27,7 +27,13 @@ export function openDrawer(id) {
   const handlers = [];
 
   function onKey(e) {
-    if (e.key === 'Escape') closeDrawer();
+    if (e.key === 'Escape') {
+      const root = document.getElementById('modal-root');
+      const overlays = root ? root.querySelectorAll('.overlay, .drawer-overlay') : [];
+      if (overlays.length > 0 && overlays[overlays.length - 1] === overlay) {
+        closeDrawer();
+      }
+    }
   }
   overlay.addEventListener('mousedown', (e) => e.target === overlay && closeDrawer());
   document.addEventListener('keydown', onKey);
@@ -99,18 +105,25 @@ export function openDrawer(id) {
       app.salary ? h('div', { class: 'meta-list__row' }, h('dt', {}, 'Gaji'), h('dd', {}, app.salary)) : null,
       app.link
         ? h('div', { class: 'meta-list__row' }, h('dt', {}, 'Tautan'),
-            h('dd', {}, h('a', { href: app.link, target: '_blank', rel: 'noopener' }, 'Buka Lowongan ↗')))
+            h('dd', {}, h('a', { href: app.link, target: '_blank', rel: 'noopener noreferrer' }, 'Buka Lowongan ↗')))
         : null);
 
     // -- Log Aktivitas
-    const logInput = h('textarea', { class: 'input', placeholder: 'Tulis catatan aktivitas atau hasil komunikasi…', style: 'min-height:70px;' });
-    const logBtn = h('button', { class: 'btn btn--primary btn--sm', onclick: () => {
+    const logInput = h('textarea', { class: 'input', placeholder: 'Tulis catatan aktivitas atau hasil komunikasi… (Ctrl+Enter untuk simpan cepat)', style: 'min-height:70px;' });
+    const saveLog = () => {
       const text = logInput.value.trim();
       if (!text) return;
       addLog(id, text);
       logInput.value = '';
       toast('Aktivitas berhasil dicatat.');
-    } }, 'Simpan');
+    };
+    logInput.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        saveLog();
+      }
+    });
+    const logBtn = h('button', { class: 'btn btn--primary btn--sm', onclick: saveLog }, 'Simpan');
 
     const quickTags = ['Interview dijadwalkan', 'Follow-up dikirim', 'Tes teknis selesai', 'Offer diterima'].map((t) =>
       h('button', { class: 'btn btn--ghost btn--sm', onclick: () => { addLog(id, t); toast('Aktivitas dicatat.'); } }, t));

@@ -15,7 +15,12 @@ export function openModal(el, { onClose } = {}) {
   }
 
   function onKey(e) {
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape') {
+      const overlays = root ? root.querySelectorAll('.overlay, .drawer-overlay') : [];
+      if (overlays.length > 0 && overlays[overlays.length - 1] === overlay) {
+        close();
+      }
+    }
   }
 
   overlay.addEventListener('mousedown', (e) => {

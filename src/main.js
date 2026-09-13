@@ -173,9 +173,35 @@ function init() {
 
   window.addEventListener('hashchange', () => {
     const hash = location.hash.replace(/^#\//, '') || 'dashboard';
-    if (ROUTES[hash]) {
-      route = hash;
-      render();
+    route = ROUTES[hash] ? hash : 'dashboard';
+    refreshSidebar();
+    render();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    const active = document.activeElement;
+    if (active && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)) return;
+    const modalRoot = document.getElementById('modal-root');
+    if (modalRoot && modalRoot.children.length > 0) return;
+
+    if (e.key === '/') {
+      e.preventDefault();
+      if (route !== 'applications') {
+        navigate('applications');
+      }
+      setTimeout(() => {
+        const input = document.querySelector('.toolbar input.input');
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 40);
+    } else if (e.key === 'n' || e.key === 'N') {
+      e.preventDefault();
+      openAppForm();
+    } else if (e.key === '?') {
+      e.preventDefault();
+      openUserGuide();
     }
   });
 
