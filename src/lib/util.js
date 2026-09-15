@@ -100,14 +100,84 @@ export const esc = (s) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-export function download(filename, text) {
-  const blob = new Blob([text], { type: 'application/json' });
+export function download(filename, text, mime = 'application/json;charset=utf-8;') {
+  const blob = new Blob([text], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+export function fmtDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
+  const dayStr = `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+  const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `${dayStr} ${timeStr}`;
+}
+
+export function daysUntil(iso) {
+  if (!iso) return null;
+  const target = new Date(iso).getTime();
+  if (isNaN(target)) return null;
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const targetStart = new Date(new Date(iso).getFullYear(), new Date(iso).getMonth(), new Date(iso).getDate()).getTime();
+  const diffDays = Math.round((targetStart - todayStart) / 86400000);
+  return diffDays;
+}
+
+export function exportToCSV(apps) {
+  const headers = ['Perusahaan', 'Posisi', 'Tahap', 'Tipe Kerja', 'Lokasi', 'Gaji', 'Tanggal Submit', 'Jadwal Interview', 'Tautan', 'Catatan', 'Jumlah Log'];
+  const rows = apps.map((a) => {
+    return [
+      a.company || '',
+      a.role || '',
+      a.stage || '',
+      a.workType || '',
+      a.location || '',
+      a.salary || '',
+      a.appliedAt || '',
+      a.interviewDate || '',
+      a.link || '',
+      (a.notes || '').replace(/\r?\n/g, ' '),
+      (a.logs || []).length,
+    ].map((val) => `"${String(val).replace(/"/g, '""')}"`);
+  });
+
+  // Include UTF-8 BOM so Excel opens accented & international chars perfectly
+  const csvContent = '\uFEFF' + [headers.map((h) => `"${h}"`).join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+  return csvContent;
+}
+
+export function generateTextSummary(apps) {
+  const total = apps.length;
+  if (total === 0) return 'Belum ada lamaran di Tangga.';
+  const counts = {};
+  let active = 0;
+  apps.forEach((a) => {
+    counts[a.stage] = (counts[a.stage] || 0) + 1;
+    if (a.stage !== 'hired' && a.stage !== 'rejected') active++;
+  });
+
+  const lines = [
+    `📌 *Ringkasan Tangga — Pelacak Lamaran Kerja*`,
+    `📅 Tanggal: ${fmtDay(todayISO())}`,
+    `📊 Total Lamaran: ${total} lowongan`,
+    `⚡ Sedang Berjalan: ${active} lamaran`,
+    `🎯 Wawancara Aktif: ${counts.interview || 0}`,
+    `🎉 Tawaran / Diterima: ${(counts.offer || 0) + (counts.hired || 0)}`,
+    `❌ Ditolak / Ditutup: ${counts.rejected || 0}`,
+    '',
+    '💼 *Daftar Lamaran Terkini:*',
+    ...apps.slice(0, 10).map((a, i) => `${i + 1}. *${a.company}* — ${a.role} [${a.stage.toUpperCase()}]`),
+    apps.length > 10 ? `...dan ${apps.length - 10} lamaran lainnya.` : '',
+  ].filter(Boolean);
+
+  return lines.join('\n');
 }
 
 export function debounce(fn, ms = 180) {

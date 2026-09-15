@@ -55,6 +55,20 @@ export function renderSidebar({ onNav }) {
 
   const nav = h('nav', { class: 'mt-5 flex flex-col gap-1' }, items.map(navItem));
 
+  const searchBtn = h('button', {
+    class: 'sidebar-search-btn mt-3 flex items-center justify-between gap-2 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1.5 text-xs text-[var(--text-secondary)] hover:border-[var(--brand-border)] hover:text-[var(--text)] transition duration-150',
+    onclick: () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+    },
+    title: 'Buka Spotlight Search (Ctrl+K)'
+  },
+    h('span', { class: 'flex items-center gap-2' },
+      h('span', { html: iconHTML('search', 13) }),
+      h('span', {}, 'Cari lowongan...')
+    ),
+    h('span', { class: 'header-kbd-badge' }, '⌘K')
+  );
+
   const sidebar = h('aside', { class: 'sidebar' },
     h('div', { class: 'flex items-center gap-3 px-2 pb-4 pt-1 border-b border-[var(--border)]' },
       h('span', {
@@ -67,7 +81,8 @@ export function renderSidebar({ onNav }) {
         h('div', { class: 'text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]' }, 'Pelacak Lamaran')
       )
     ),
-    h('div', { class: 'px-2 pb-1 pt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]' }, 'Menu'),
+    searchBtn,
+    h('div', { class: 'px-2 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]' }, 'Menu'),
     nav,
     h('div', { class: 'mt-auto rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs leading-relaxed text-[var(--text-muted)] flex flex-col gap-2' },
       h('div', { class: 'flex items-center justify-between' },

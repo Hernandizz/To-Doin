@@ -1,6 +1,6 @@
 // appDrawer — panel detail lamaran (geser dari kanan), reaktif ke store
 
-import { h, fmtDate, relTime } from '../lib/util.js';
+import { h, fmtDate, relTime, fmtDateTime, daysUntil } from '../lib/util.js';
 import { getApp, STAGES, TERMINAL, setStage, moveStage, addLog, deleteApp, subscribe, stageMeta } from '../lib/store.js';
 import { icon } from './icons.js';
 import { toast } from './toast.js';
@@ -96,11 +96,46 @@ export function openDrawer(id) {
             'Tandai Ditolak')
         : null);
 
+    // -- Interview Schedule Banner (jika ada jadwal)
+    let interviewBanner = null;
+    if (app.interviewDate) {
+      const dDiff = daysUntil(app.interviewDate);
+      let timeNote = '';
+      if (dDiff != null) {
+        if (dDiff < 0) timeNote = ' (Sudah Lewat)';
+        else if (dDiff === 0) timeNote = ' ⚡ (Hari ini!)';
+        else if (dDiff === 1) timeNote = ' 📅 (Besok)';
+        else timeNote = ` ⏳ (${dDiff} hari lagi)`;
+      }
+
+      interviewBanner = h('div', {
+        class: 'drawer-interview-banner',
+        style: 'background:rgba(139, 92, 246, 0.12); border:1px solid rgba(139, 92, 246, 0.35); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:16px; display:flex; align-items:center; gap:10px;'
+      },
+        h('span', { style: 'color:var(--stage-interview); display:flex; flex-shrink:0;' }, icon('calendar', 20)),
+        h('div', { style: 'flex:1; min-width:0;' },
+          h('div', { style: 'font-weight:600; font-size:0.875rem; color:var(--text);' }, 'Jadwal Interview Mendatang'),
+          h('div', { style: 'font-size:0.8125rem; color:var(--text-secondary); margin-top:2px;' },
+            `${fmtDateTime(app.interviewDate)}${timeNote}`
+          )
+        ),
+        h('button', {
+          class: 'btn btn--quiet btn--sm',
+          style: 'font-size:11px; padding:3px 8px;',
+          onclick: () => {
+            closeDrawer();
+            openAppForm(app);
+          }
+        }, 'Ubah')
+      );
+    }
+
     // -- Data Informasi Utama
     const metaList = h('dl', { class: 'meta-list' },
       h('div', { class: 'meta-list__row' }, h('dt', {}, 'Tipe Kerja'), h('dd', {}, app.workType === 'remote' ? 'Remote' : app.workType === 'hybrid' ? 'Hybrid' : 'Onsite')),
       h('div', { class: 'meta-list__row' }, h('dt', {}, 'Status'), h('dd', {}, fmtStageChip(app.stage))),
       h('div', { class: 'meta-list__row' }, h('dt', {}, 'Submit'), h('dd', {}, fmtDate(app.appliedAt))),
+      app.interviewDate ? h('div', { class: 'meta-list__row' }, h('dt', {}, 'Jadwal Interview'), h('dd', {}, fmtDateTime(app.interviewDate))) : null,
       app.location ? h('div', { class: 'meta-list__row' }, h('dt', {}, 'Lokasi'), h('dd', {}, app.location)) : null,
       app.salary ? h('div', { class: 'meta-list__row' }, h('dt', {}, 'Gaji'), h('dd', {}, app.salary)) : null,
       app.link
@@ -125,11 +160,18 @@ export function openDrawer(id) {
     });
     const logBtn = h('button', { class: 'btn btn--primary btn--sm', onclick: saveLog }, 'Simpan');
 
-    const quickTags = ['Interview dijadwalkan', 'Follow-up dikirim', 'Tes teknis selesai', 'Offer diterima'].map((t) =>
+    const quickTags = [
+      'Interview dijadwalkan',
+      'Kirim email follow-up status',
+      'Tes teknis / live coding selesai',
+      'Interview HR / User selesai',
+      'Offer letter diterima 🎉',
+      'Follow-up via LinkedIn recruiter',
+    ].map((t) =>
       h('button', { class: 'btn btn--ghost btn--sm', onclick: () => { addLog(id, t); toast('Aktivitas dicatat.'); } }, t));
 
     const logBlock = h('div', { class: 'detail-section' },
-      h('h3', {}, 'Catatan Aktivitas'),
+      h('h3', {}, 'Catatan Aktivitas & Logbook'),
       h('div', { style: 'display:flex;flex-direction:column;gap:10px;' },
         h('div', { style: 'display:flex;flex-direction:column;gap:8px;' }, logInput,
           h('div', { style: 'display:flex;justify-content:flex-end;' }, logBtn)),
@@ -157,6 +199,7 @@ export function openDrawer(id) {
 
     const body = h('div', { class: 'drawer__body' },
       rail, actions,
+      interviewBanner,
       h('div', { class: 'detail-section' }, h('h3', {}, 'Informasi Lowongan'), metaList),
       app.notes ? h('div', { class: 'detail-section' }, h('h3', {}, 'Catatan Pribadi'), h('p', { style: 'color:var(--text-soft);white-space:pre-wrap;font-size:0.875rem;' }, app.notes)) : null,
       logBlock);

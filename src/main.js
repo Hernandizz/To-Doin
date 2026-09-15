@@ -8,9 +8,10 @@ import { renderSettings } from './views/settings.js';
 import { openAppForm } from './components/appForm.js';
 import { openDrawer } from './components/appDrawer.js';
 import { openUserGuide } from './components/userGuide.js';
-import { h, fmtDay } from './lib/util.js';
+import { openCommandPalette } from './components/commandPalette.js';
+import { h, fmtDay, download } from './lib/util.js';
 import { iconEl } from './components/icons.js';
-import { subscribe, getState } from './lib/store.js';
+import { subscribe, getState, exportCSV, exportJSON } from './lib/store.js';
 import { toast } from './components/toast.js';
 
 let route = 'dashboard';
@@ -24,6 +25,24 @@ const ROUTES = {
   applications: { title: 'Semua Lamaran', sub: 'Daftar lengkap untuk menyaring, mencari, dan mengelola' },
   settings: { title: 'Pengaturan', sub: 'Kelola preferensi tema, cadangan data, dan contoh' },
 };
+
+function triggerCommandPalette() {
+  openCommandPalette({
+    onOpenApp: (id) => openDrawer(id),
+    onNavigate: (to) => navigate(to),
+    onNewApp: () => openAppForm(),
+    onToggleTheme: () => toggleTheme(),
+    onExportCSV: () => {
+      download(`tangga-lamaran-${new Date().toISOString().slice(0, 10)}.csv`, exportCSV(), 'text/csv;charset=utf-8;');
+      toast('Spreadsheet CSV berhasil diunduh.', 'success');
+    },
+    onExportJSON: () => {
+      download(`tangga-cadangan-${new Date().toISOString().slice(0, 10)}.json`, exportJSON());
+      toast('Cadangan JSON berhasil diunduh.', 'success');
+    },
+    onOpenGuide: () => openUserGuide(),
+  });
+}
 
 function navigate(to) {
   route = to;
@@ -90,6 +109,16 @@ function updateHeader() {
   );
 
   const actions = h('div', { class: 'page-header__actions' },
+    h('button', {
+      class: 'btn btn--ghost btn--sm header-search-trigger',
+      onclick: triggerCommandPalette,
+      title: 'Buka Spotlight Search (Ctrl+K / Cmd+K)',
+      'aria-label': 'Cari Cepat'
+    },
+      iconEl('search', 14),
+      h('span', {}, 'Cari'),
+      h('span', { class: 'header-kbd-badge' }, '⌘K')
+    ),
     h('button', {
       class: 'btn btn--ghost btn--sm',
       onclick: openUserGuide,
@@ -179,6 +208,12 @@ function init() {
   });
 
   window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      triggerCommandPalette();
+      return;
+    }
+
     const active = document.activeElement;
     if (active && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)) return;
     const modalRoot = document.getElementById('modal-root');

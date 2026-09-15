@@ -15,6 +15,7 @@ export function openAppForm(app) {
     workType: app?.workType || 'onsite',
     stage: app?.stage || 'applied',
     appliedAt: app?.appliedAt || todayISO(),
+    interviewDate: app?.interviewDate || '',
     link: app?.link || '',
     salary: app?.salary || '',
     notes: app?.notes || '',
@@ -101,6 +102,12 @@ export function openAppForm(app) {
   row4.append(field('Tautan lowongan', input('link', f.link, 'https://...')));
   row4.append(field('Kisaran gaji', input('salary', f.salary, 'Rp 10–15 jt')));
 
+  const row5 = document.createElement('div');
+  row5.className = 'grid-2';
+  const interviewEl = input('interviewDate', f.interviewDate, '');
+  interviewEl.type = 'datetime-local';
+  row5.append(field('Jadwal Interview / Wawancara (opsional)', interviewEl));
+
   const notesField = field(
     'Catatan',
     (() => {
@@ -114,7 +121,7 @@ export function openAppForm(app) {
     })()
   );
 
-  body.append(row1, row2, row3, row4, notesField);
+  body.append(row1, row2, row3, row4, row5, notesField);
 
   body.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -155,6 +162,7 @@ export function openAppForm(app) {
         workType: f.workType,
         stage: f.stage,
         appliedAt: f.appliedAt,
+        interviewDate: f.interviewDate,
         link: f.link.trim(),
         salary: f.salary.trim(),
         notes: f.notes.trim(),
@@ -169,6 +177,7 @@ export function openAppForm(app) {
         workType: f.workType,
         stage: f.stage,
         appliedAt: f.appliedAt,
+        interviewDate: f.interviewDate,
         link: f.link.trim(),
         salary: f.salary.trim(),
         notes: f.notes.trim(),

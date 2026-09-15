@@ -1,6 +1,6 @@
 // store — state, persistensi localStorage, dan seluruh operasi CRUD
 
-import { uid, todayISO, toMs } from './util.js';
+import { uid, todayISO, toMs, exportToCSV, daysSince } from './util.js';
 
 const KEY = 'tangga.data.v1';
 
@@ -33,6 +33,7 @@ const defaultApp = () => ({
   workType: 'onsite',
   stage: 'draft',
   appliedAt: todayISO(),
+  interviewDate: '',
   link: '',
   salary: '',
   notes: '',
@@ -252,12 +253,49 @@ export function exportJSON() {
   return JSON.stringify(state, null, 2);
 }
 
+export function exportCSV() {
+  flushPersist();
+  return exportToCSV(state.apps);
+}
+
+export function getStorageStats() {
+  const json = exportJSON();
+  const bytes = new Blob([json]).size;
+  const kb = (bytes / 1024).toFixed(2);
+  let totalLogs = 0;
+  for (let i = 0; i < state.apps.length; i++) {
+    totalLogs += (state.apps[i].logs || []).length;
+  }
+  return {
+    bytes,
+    kb,
+    appCount: state.apps.length,
+    logCount: totalLogs,
+  };
+}
+
+// Cek apakah lamaran aktif sudah mengendap > maxDays tanpa perubahan
+export function isStaleApp(app, maxDays = 14) {
+  if (!app || TERMINAL.includes(app.stage)) return false;
+  const lastActivity = app.logs && app.logs.length > 0
+    ? app.logs[app.logs.length - 1].at
+    : app.updatedAt || app.appliedAt;
+  return daysSince(lastActivity) >= maxDays;
+}
+
 // ---------- data contoh (seed) ----------
 
 function daysAgo(n) {
   const d = new Date();
   d.setDate(d.getDate() - n);
   return d.toISOString().slice(0, 10);
+}
+
+function daysFromNow(n, hours = 10, minutes = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  d.setHours(hours, minutes, 0, 0);
+  return d.toISOString().slice(0, 16); // format YYYY-MM-DDTHH:mm
 }
 
 function demoApps() {
@@ -275,14 +313,15 @@ function demoApps() {
       workType: 'hybrid',
       stage: 'interview',
       appliedAt: daysAgo(26),
-      link: '',
+      interviewDate: daysFromNow(2, 14, 0),
+      link: 'https://career.nusantara.example',
       salary: 'Rp 12–18 jt',
       notes: 'Mereka pakai stack React + TypeScript. Fokus tes soal component & state.',
       logs: [
         { id: uid(), text: 'Lamaran dikirim via website karier.', at: t(26) },
         { id: uid(), text: 'HR menghubungi, jadwal tes teknis.', at: t(19) },
         { id: uid(), text: 'Tes teknis online selesai, hasil menunggu.', at: t(12) },
-        { id: uid(), text: 'Interview user & fitur dijadwalkan minggu depan.', at: t(3) },
+        { id: uid(), text: 'Interview user & fitur dijadwalkan lusa jam 14:00 WIB.', at: t(3) },
       ],
       createdAt: t(26),
       updatedAt: t(3),
@@ -295,9 +334,10 @@ function demoApps() {
       workType: 'onsite',
       stage: 'screening',
       appliedAt: daysAgo(14),
+      interviewDate: '',
       link: 'https://career.garudakarya.example/',
       salary: 'Rp 15–22 jt',
-      notes: '',
+      notes: 'Tim B2B SaaS. Menunggu kabar lolos screening berkas.',
       logs: [
         { id: uid(), text: 'Submit aplikasi bersama cover letter.', at: t(14) },
         { id: uid(), text: 'Dibaca recruiter, masuk pipeline seleksi.', at: t(8) },
@@ -313,6 +353,7 @@ function demoApps() {
       workType: 'remote',
       stage: 'offer',
       appliedAt: daysAgo(45),
+      interviewDate: '',
       link: '',
       salary: 'Rp 18–25 jt',
       notes: 'Tim kecil, product sudah bertahan 3 tahun. Chemistry interview sangat nyambung.',
@@ -321,7 +362,7 @@ function demoApps() {
         { id: uid(), text: 'Technical interview dengan lead.', at: t(38) },
         { id: uid(), text: 'Live coding 90 menit.', at: t(30) },
         { id: uid(), text: 'Final interview dengan co-founder.', at: t(15) },
-        { id: uid(), text: 'Offer datang! Menunggu keputusan.', at: t(4) },
+        { id: uid(), text: 'Offer datang! Menunggu keputusan offering letter.', at: t(4) },
       ],
       createdAt: t(45),
       updatedAt: t(4),
@@ -334,6 +375,7 @@ function demoApps() {
       workType: 'onsite',
       stage: 'applied',
       appliedAt: daysAgo(6),
+      interviewDate: '',
       link: '',
       salary: 'Rp 8–12 jt',
       notes: '',
@@ -349,6 +391,7 @@ function demoApps() {
       workType: 'hybrid',
       stage: 'draft',
       appliedAt: daysAgo(2),
+      interviewDate: '',
       link: '',
       salary: '',
       notes: 'Masih menyusun resume versi terakhir. Requirement: SQL + Tableau.',
@@ -364,6 +407,7 @@ function demoApps() {
       workType: 'onsite',
       stage: 'rejected',
       appliedAt: daysAgo(60),
+      interviewDate: '',
       link: '',
       salary: '',
       notes: 'Feedback HR: posisi diisi kandidat internal.',
@@ -384,6 +428,7 @@ function demoApps() {
       workType: 'remote',
       stage: 'hired',
       appliedAt: daysAgo(80),
+      interviewDate: '',
       link: '',
       salary: 'Rp 10–14 jt',
       notes: 'Kontrak 12 bulan, mulai bulan depan.',
@@ -404,13 +449,14 @@ function demoApps() {
       workType: 'hybrid',
       stage: 'interview',
       appliedAt: daysAgo(33),
+      interviewDate: daysFromNow(5, 10, 30),
       link: '',
       salary: 'Rp 9–13 jt',
       notes: '',
       logs: [
         { id: uid(), text: 'Lamaran dikirim.', at: t(33) },
         { id: uid(), text: 'Interview HRD.', at: t(25) },
-        { id: uid(), text: 'Interview user (tim marketing).', at: t(9) },
+        { id: uid(), text: 'Interview user dijadwalkan.', at: t(9) },
       ],
       createdAt: t(33),
       updatedAt: t(9),

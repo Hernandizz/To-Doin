@@ -1,7 +1,7 @@
 // appCard — kartu lamaran di board
 
-import { h, fmtDateShort, daysSince } from '../lib/util.js';
-import { stageMeta, STAGES, TERMINAL } from '../lib/store.js';
+import { h, fmtDateShort, daysSince, daysUntil } from '../lib/util.js';
+import { stageMeta, STAGES, TERMINAL, isStaleApp } from '../lib/store.js';
 import { iconEl, iconHTML } from './icons.js';
 
 export function renderCard(app, { onOpen, onAdvance, onBack, onDecline }) {
@@ -11,9 +11,35 @@ export function renderCard(app, { onOpen, onAdvance, onBack, onDecline }) {
   const isHired = app.stage === 'hired';
   const lastLog = app.logs?.at(-1);
   const days = daysSince(app.appliedAt);
+  const isDormant = isStaleApp(app, 14);
 
   const mainStages = STAGES.slice(0, 5);
   const reached = Math.min(activeIdx, mainStages.length - 1);
+
+  // Periksa jadwal interview
+  let interviewBadge = null;
+  if (app.interviewDate) {
+    const dDiff = daysUntil(app.interviewDate);
+    if (dDiff != null) {
+      let lbl = '';
+      let badgeStyle = 'background:rgba(139, 92, 246, 0.15); color:var(--stage-interview); border:1px solid rgba(139, 92, 246, 0.4);';
+      if (dDiff < 0) {
+        lbl = 'Interview lalu';
+      } else if (dDiff === 0) {
+        lbl = 'Interview Hari Ini!';
+        badgeStyle = 'background:rgba(239, 68, 68, 0.18); color:var(--danger); border:1px solid rgba(239, 68, 68, 0.4); font-weight:700;';
+      } else if (dDiff === 1) {
+        lbl = 'Interview Besok';
+        badgeStyle = 'background:rgba(245, 158, 11, 0.18); color:var(--warning); border:1px solid rgba(245, 158, 11, 0.4); font-weight:600;';
+      } else {
+        lbl = `Interview H-${dDiff}`;
+      }
+      interviewBadge = h('div', { class: 'app-card__interview-badge', style: badgeStyle },
+        iconEl('calendar', 11),
+        h('span', { class: 'truncate' }, lbl)
+      );
+    }
+  }
 
   const card = h(
     'div',
@@ -61,6 +87,9 @@ export function renderCard(app, { onOpen, onAdvance, onBack, onDecline }) {
       })
     ),
 
+    // Interview badge if scheduled
+    interviewBadge,
+
     // Meta details (Date, Location, Salary)
     h('div', { class: 'app-card__meta' },
       h('div', { class: 'app-card__meta-item' },
@@ -77,6 +106,14 @@ export function renderCard(app, { onOpen, onAdvance, onBack, onDecline }) {
         ? h('div', { class: 'app-card__meta-item' }, iconEl('briefcase', 12), app.salary)
         : null
     ),
+
+    // Dormant / Stale alert snippet
+    isDormant
+      ? h('div', { class: 'app-card__stale-alert' },
+          iconEl('alertTriangle', 11),
+          h('span', { class: 'truncate' }, 'Belum ada kabar > 14 hari (Perlu Follow-up)')
+        )
+      : null,
 
     // Latest activity snippet
     lastLog

@@ -1,7 +1,7 @@
 // view: Ringkasan (dashboard)
 
-import { h, daysSince } from '../lib/util.js';
-import { getApps, STAGES, stageMeta, TERMINAL, resetDemo } from '../lib/store.js';
+import { h, daysSince, fmtDateTime, daysUntil, generateTextSummary } from '../lib/util.js';
+import { getApps, STAGES, stageMeta, TERMINAL, resetDemo, isStaleApp } from '../lib/store.js';
 import { openAppForm } from '../components/appForm.js';
 import { openUserGuide } from '../components/userGuide.js';
 import { iconEl } from '../components/icons.js';
@@ -34,6 +34,8 @@ function computeDashboardMetrics(apps) {
   let totalWaitDays = 0;
   let active = 0;
   const pending = [];
+  const upcomingInterviews = [];
+  const staleList = [];
 
   for (let i = 0; i < apps.length; i++) {
     const a = apps[i];
@@ -42,6 +44,13 @@ function computeDashboardMetrics(apps) {
 
     if (stage !== 'hired' && stage !== 'rejected') {
       active++;
+      if (isStaleApp(a, 14)) {
+        staleList.push(a);
+      }
+    }
+
+    if (a.interviewDate) {
+      upcomingInterviews.push(a);
     }
 
     if (stage === 'interview' || stage === 'offer' || stage === 'screening') {
@@ -58,6 +67,9 @@ function computeDashboardMetrics(apps) {
     }
   }
 
+  // Urutkan interview berdasarkan tanggal terdekat
+  upcomingInterviews.sort((a, b) => new Date(a.interviewDate) - new Date(b.interviewDate));
+
   const avgWait = apps.length ? Math.round(totalWaitDays / apps.length) : 0;
   const interviews = counts.interview || 0;
   const offers = (counts.offer || 0) + (counts.hired || 0);
@@ -73,6 +85,8 @@ function computeDashboardMetrics(apps) {
     interviews,
     offers,
     pending,
+    upcomingInterviews,
+    staleList,
     avgWait,
     monthBars: months,
     chartTotal,
@@ -462,6 +476,60 @@ export function renderDashboard(onOpen) {
             monthBars.map((m) =>
               h('span', { class: `chart__month${m.thisMonth ? ' is-now' : ''}` }, m.label)))));
 
+  // ---- Jadwal Wawancara & Tenggat Waktu ----
+  const upcomingPanel = h('div', { class: 'panel' },
+    h('div', { style: 'display:flex; justify-content:space-between; align-items:flex-start;' },
+      h('div', {},
+        h('h2', {}, 'Jadwal Interview & Tenggat'),
+        h('div', { class: 'panel__sub' }, 'Jadwal wawancara dan agenda terdekat')),
+      upcomingInterviews.length > 0
+        ? h('span', { class: 'chip', style: 'border-color:var(--stage-interview)44; color:var(--stage-interview); font-weight:600;' },
+            `${upcomingInterviews.length} terjadwal`)
+        : null
+    ),
+    upcomingInterviews.length === 0
+      ? h('div', { style: 'padding:14px 0; display:flex; flex-direction:column; gap:6px;' },
+          h('p', { class: 'form-note' }, 'Belum ada jadwal wawancara yang ditetapkan. Masukkan tanggal jadwal interview saat menambah atau mengubah lamaran.'),
+          apps.length > 0
+            ? h('p', { class: 'form-note', style: 'color:var(--text-muted); font-size:11px;' }, '💡 Tip: Buka detail lamaran → Ubah Data → isi "Jadwal Interview".')
+            : null
+        )
+      : h('div', { class: 'attention-list' },
+          upcomingInterviews.map((a) => {
+            const meta = stageMeta(a.stage);
+            const dDiff = daysUntil(a.interviewDate);
+            let chipText = 'Terjadwal';
+            let chipStyle = 'border-color:var(--stage-interview)44; color:var(--stage-interview);';
+            if (dDiff != null) {
+              if (dDiff < 0) {
+                chipText = 'Lewat';
+                chipStyle = 'border-color:var(--text-muted); color:var(--text-muted);';
+              } else if (dDiff === 0) {
+                chipText = 'Hari ini!';
+                chipStyle = 'border-color:var(--danger)66; color:var(--danger); font-weight:700; background:rgba(239, 68, 68, 0.1);';
+              } else if (dDiff === 1) {
+                chipText = 'Besok';
+                chipStyle = 'border-color:var(--warning)66; color:var(--warning); font-weight:600; background:rgba(245, 158, 11, 0.1);';
+              } else {
+                chipText = `H-${dDiff}`;
+                chipStyle = 'border-color:var(--stage-interview)66; color:var(--stage-interview); background:rgba(139, 92, 246, 0.1);';
+              }
+            }
+
+            return h('button', {
+              class: 'attention-row',
+              onclick: () => onOpen(a.id),
+            },
+              h('span', { class: 'dot', style: `background-color:${meta.color};` }),
+              h('div', { style: 'flex:1; min-width:0; text-align:left;' },
+                h('div', { style: 'font-weight:600; font-size:0.875rem; color:var(--text);' }, a.company),
+                h('div', { style: 'font-size:0.78rem; color:var(--text-secondary);' }, `${a.role} · 🕒 ${fmtDateTime(a.interviewDate)}`)
+              ),
+              h('span', { class: 'chip', style: `${chipStyle} font-size:11px; flex-shrink:0;` }, chipText)
+            );
+          }))
+  );
+
   // ---- Perlu Tindakan ----
   const attention = h('div', { class: 'panel' },
     h('h2', {}, 'Perlu Tindakan & Follow-up'),
@@ -489,33 +557,86 @@ export function renderDashboard(onOpen) {
               onclick: () => onOpen(a.id),
             },
             h('span', { class: 'dot', style: `background-color:${meta.color};` }),
-            h('span', { style: 'flex:1;min-width:0;' },
+            h('span', { style: 'flex:1;min-width:0; text-align:left;' },
               h('span', { style: 'display:block;color:var(--text);font-weight:600;font-size:0.875rem;' }, a.company),
               h('span', { style: 'display:block;color:var(--text-secondary);font-size:0.78rem;' }, `${a.role} · ${meta.label}`)),
             h('span', { class: 'chip', style: `border-color:${meta.color}44; color:${meta.color}; font-size:11px;` },
               daysSince(a.updatedAt) === 0 ? 'Hari ini' : `${daysSince(a.updatedAt)}h lalu`));
           })));
 
+  // ---- Peringatan Lamaran Mengendap (Stale/Dormant Warning) ----
+  const staleBanner = staleList.length > 0
+    ? h('div', {
+        class: 'panel',
+        style: 'border-color:rgba(245, 158, 11, 0.35); background:rgba(245, 158, 11, 0.04);'
+      },
+        h('div', { style: 'display:flex; align-items:center; gap:8px; margin-bottom:6px;' },
+          h('span', { style: 'color:var(--warning); display:flex;' }, iconEl('alertTriangle', 16)),
+          h('h3', { style: 'font-size:0.95rem; font-weight:600; color:var(--warning); margin:0;' },
+            `Perhatian: ${staleList.length} Lamaran Mengendap Tanpa Kabar > 14 Hari`
+          )
+        ),
+        h('p', { class: 'form-note', style: 'color:var(--text-secondary); margin-bottom:12px;' },
+          'Lamaran berikut sudah lama tidak ada interaksi atau pembaruan. Disarankan mengirim pesan follow-up sopan ke recruiter.'
+        ),
+        h('div', { style: 'display:flex; flex-wrap:wrap; gap:8px;' },
+          staleList.slice(0, 4).map((a) =>
+            h('button', {
+              class: 'btn btn--ghost btn--sm',
+              style: 'font-size:12px; border-color:var(--border-strong);',
+              onclick: () => onOpen(a.id)
+            },
+              `${a.company} (${a.role}) → Follow-up`
+            )
+          ),
+          staleList.length > 4
+            ? h('span', { style: 'font-size:12px; color:var(--text-muted); align-self:center;' }, `+${staleList.length - 4} lainnya`)
+            : null
+        )
+      )
+    : null;
+
   // ---- Ritme & Statistik Efektivitas ----
-  const bottomRow = h('div', { class: 'grid-2col' }, attention,
-    h('div', { class: 'panel' },
-      h('h2', {}, 'Ritme & Statistik'),
-      h('div', { class: 'panel__sub' }, 'Konsistensi pengiriman dan tingkat respons lamaran'),
-      apps.length === 0
-        ? h('p', { class: 'form-note', style: 'padding:16px 0;' }, 'Setelah kamu mencatat beberapa lamaran, metrik waktu tunggu dan rasio respons akan otomatis dihitung.')
-        : h('div', { style: 'display:flex;flex-direction:column;gap:12px;margin-top:4px;' },
-            statRow('Rata-rata lamaran per minggu', (apps.length / Math.max(avgWait / 7, 1)).toFixed(1)),
-            statRow('Rata-rata waktu tunggu', `${avgWait} hari`),
-            statRow('Tingkat konversi respons', `${Math.round(((apps.length - (counts.draft + counts.applied)) / Math.max(apps.length,1)) * 100)}%`),
-          )));
+  const statsPanel = h('div', { class: 'panel' },
+    h('div', { style: 'display:flex; justify-content:space-between; align-items:flex-start;' },
+      h('div', {},
+        h('h2', {}, 'Ritme & Statistik'),
+        h('div', { class: 'panel__sub' }, 'Konsistensi pengiriman dan tingkat respons lamaran')
+      ),
+      apps.length > 0
+        ? h('button', {
+            class: 'btn btn--ghost btn--sm',
+            title: 'Salin ringkasan ke papan klip',
+            onclick: () => {
+              try {
+                navigator.clipboard.writeText(generateTextSummary(apps));
+                toast('Ringkasan progres berhasil disalin ke clipboard!', 'success');
+              } catch (e) {
+                toast('Gagal menyalin ringkasan.', 'danger');
+              }
+            }
+          }, iconEl('copy', 13), 'Salin Ringkasan')
+        : null
+    ),
+    apps.length === 0
+      ? h('p', { class: 'form-note', style: 'padding:16px 0;' }, 'Setelah kamu mencatat beberapa lamaran, metrik waktu tunggu dan rasio respons akan otomatis dihitung.')
+      : h('div', { style: 'display:flex;flex-direction:column;gap:12px;margin-top:4px;' },
+          statRow('Rata-rata lamaran per minggu', (apps.length / Math.max(avgWait / 7, 1)).toFixed(1)),
+          statRow('Rata-rata waktu tunggu', `${avgWait} hari`),
+          statRow('Tingkat konversi respons', `${Math.round(((apps.length - (counts.draft + counts.applied)) / Math.max(apps.length,1)) * 100)}%`),
+        )
+  );
 
   const chartsRow = h('div', { class: 'grid-2col' }, chart, stagePie);
+  const middleRow = h('div', { class: 'grid-2col' }, upcomingPanel, attention);
 
   return h('div', { style: 'display:flex;flex-direction:column;gap:16px;' },
     apps.length === 0 ? renderOnboardingHero() : null,
     kpiGrid,
+    staleBanner,
     chartsRow,
-    bottomRow);
+    middleRow,
+    statsPanel);
 }
 
 function statRow(label, value) {
